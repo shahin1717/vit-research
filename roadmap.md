@@ -8,7 +8,7 @@
 
 ---
 
-## �� Executive Objective
+## 🎯 Executive Objective
 
 Investigate whether adding learnable **register tokens** ($K \in \{0, 1, 4, 8\}$) to compact Vision Transformers (ViT-Tiny / ViT-Small) acts as a **structural regularizer** against overfitting when trained on a severely constrained dataset ($\sim 10\text{k}$ CIFAR-100 images). We will evaluate this quantitatively via:
 1. **Classification Accuracy & Generalization Gap:** $\Delta\mathcal{L} = \mathcal{L}_{\text{val}} - \mathcal{L}_{\text{train}}$.
@@ -47,7 +47,7 @@ gantt
 **Goal:** Build the modular core components for data loading and register-augmented ViTs.
 
 - [ ] **1.1 Setup Virtual Environment:**
-  - Create and activate `aiac-res` conda environment (`Python 3.11`).
+  - Create/activate conda environment (`Python 3.11`).
   - Install dependencies (`pip install -r requirements.txt`).
   - Verify CUDA GPU availability and memory limits.
 - [ ] **1.2 Stratified Low-Data Dataset Loader (`src/data/cifar100_subset.py`):**
