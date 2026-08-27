@@ -1,0 +1,40 @@
+experiment:
+  name: "vit_tiny_k1"
+  description: "ViT-Tiny with K=1 register token on 10k CIFAR-100 subset"
+  seed: 42
+  device: "cuda"
+
+model:
+  backbone: "vit_tiny_patch16_224"
+  pretrained: true
+  num_classes: 100
+  num_registers: 1          # K = 1
+  drop_rate: 0.0
+  attn_drop_rate: 0.0
+
+data:
+  dataset: "cifar100"
+  data_dir: "./data"
+  image_size: 224
+  samples_per_class: 100
+  batch_size: 64
+  num_workers: 4
+  val_split: 0.1
+
+training:
+  epochs: 50
+  optimizer: "adamw"
+  lr: 0.0005
+  weight_decay: 0.05
+  lr_scheduler: "cosine"
+  warmup_epochs: 5
+  min_lr: 0.00001
+  amp: true
+  gradient_clip: 1.0
+
+logging:
+  save_dir: "./outputs/vit_tiny_k1"
+  checkpoint_dir: "./checkpoints/vit_tiny_k1"
+  log_freq_steps: 20
+  eval_freq_epochs: 1
+  save_attention_maps: true

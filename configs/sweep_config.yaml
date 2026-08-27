@@ -1,0 +1,18 @@
+sweep:
+  name: "vit_registers_low_data_sweep"
+  description: "Full ablation sweep across register counts K in {0, 1, 4, 8} and 3 seeds"
+
+parameters:
+  num_registers:
+    values: [0, 1, 4, 8]
+  seed:
+    values: [42, 1337, 2026]
+  backbone:
+    values: ["vit_tiny_patch16_224"]
+  samples_per_class:
+    value: 100               # 10,000 training images total
+
+compute_budget:
+  max_training_days: 2.0
+  max_vram_gb: 12.0
+  amp_enabled: true

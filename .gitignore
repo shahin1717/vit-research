@@ -1,0 +1,73 @@
+# ==============================================================================
+# Git Ignore Configuration: ViT Registers Research Project (aiac-res)
+# ==============================================================================
+
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.ipynb_checkpoints/
+.ruff_cache/
+
+# Conda / Virtual Environments
+env/
+venv/
+.venv/
+ENV/
+.conda/
+miniconda3/
+
+# Model Checkpoints & Large Binaries (Strictly Ignored)
+checkpoints/*
+!checkpoints/.gitkeep
+weights/*
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.onnx
+*.safetensors
+*.engine
+
+# Datasets & Cached Tensors
+data/*
+!data/.gitkeep
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.parquet
+
+# Training Outputs, TensorBoard & Wandb Runs
+outputs/*
+!outputs/.gitkeep
+runs/
+tb_logs/
+wandb/
+*.log
+
+# IDE & Operating System Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+*.swp
+*.swo
+
+# Project Local Workspace Links & Agents
+aiac-res.code-workspace
+.agents/
+.claude/
+.gemini/
+.system_generated/
