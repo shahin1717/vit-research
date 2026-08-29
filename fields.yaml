@@ -1,0 +1,26 @@
+fields:
+  - name: "Softmax Sink Mechanics"
+    description: "Mathematical cause of background token norm inflation and attention concentration in Multi-Head Self-Attention."
+    detail_level: "detailed"
+
+  - name: "Register Token Formulation"
+    description: "Learnable token injection, sequence composition, position embedding interaction, and head routing."
+    detail_level: "detailed"
+
+  - name: "Data Scarcity & Inductive Bias"
+    description: "Behavior of compact ViTs (ViT-Tiny/Small) on limited training samples (~10k) and regularizing mechanisms."
+    detail_level: "detailed"
+
+  - name: "Capacity Dilution Hypothesis"
+    description: "Threshold dynamics where excessive registers (K >= 8) consume token dimension capacity in low-width (d=192) architectures."
+    detail_level: "detailed"
+
+  - name: "Diagnostic Metrics Suite"
+    description: "Formulas and implementation for Layer-wise Shannon Attention Entropy, Patch-Norm Outlier Rate, and Generalization Gap."
+    detail_level: "detailed"
+
+  - name: "Implementation & Hardware Budget"
+    description: "PyTorch/timm wrapper design, AMP forward hooks, memory footprint (<=12 GB), and sweep orchestrator."
+    detail_level: "detailed"
+
+uncertain: []
