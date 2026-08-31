@@ -4,41 +4,13 @@
 **Track:** Track 1 — Pure Research  
 **Project Title:** Do Register Tokens Regularize Vision Transformers Under Data Scarcity?  
 **Team Members:** Shahin, Gulnisa, Narmina, Emil, Rufet  
-**Cohort & Cluster Partitioning:** 12 Course Groups across 2x NVIDIA A100 (40 GB) -> 4x MIG Instances (20 GB VRAM each), 3 Groups per 20 GB Slice  
+**Cluster Setup:** 12 Groups sharing 2x NVIDIA A100 (40 GB) -> 4x MIG Instances (20 GB VRAM each, 3 Groups per 20 GB Slice)  
 **Date:** August 31, 2026  
 **Target Submission:** Monday, 7 September 2026, 23:59  
 
 ---
 
-## 📌 1. Executive Summary & Cluster Allocation Request (For TA)
-
-This document provides the formal compute request tailored to the cohort sharing model: **12 course groups sharing 2x NVIDIA A100 (40 GB) GPUs partitioned into 4x MIG slices of 20 GB VRAM each (3 groups sharing each 20 GB slice)**.
-
-### Cluster Sharing & Fair-Share Summary
-
-```text
-Class GPU Infrastructure (2x Physical A100 40GB):
-├── Physical GPU 0 (40 GB) ──┬── MIG Instance 0 (20 GB) ──► Groups 1, 2, 3
-│                            └── MIG Instance 1 (20 GB) ──► Groups 4, 5, 6
-│
-└── Physical GPU 1 (40 GB) ──┬── MIG Instance 2 (20 GB) ──► Groups 7, 8, 9
-                             └── MIG Instance 3 (20 GB) ──► Groups 10, 11, 12 [Our Team]
-```
-
-### Quick Resource Summary Table
-
-| Parameter | 3-Group Shared Slice Budget | Our Team Request | Impact on Peer Groups | Compliance Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **Hardware Slice** | **1x NVIDIA A100 MIG (20 GB VRAM)** | Dedicated time slot on our slice | Shared with 2 other groups | 100% Compatible |
-| **Peak VRAM Occupancy** | **20.0 GB Total Memory** | **~2.88 GB – 3.20 GB** (Batch 64 + AMP) | Leaves 16.80 GB (84% Free) | Zero Risk of OOM |
-| **Time Budget (48h Window)** | **16.0 GPU Hours per Group** (1/3 of 48h) | **4.0 GPU Hours total** (12 runs + buffer) | **Uses only 25% of our group quota** | Highly Generous to Peers |
-| **Core Sweeps Duration** | Continuous execution | **96 minutes total (1.60 GPU Hours)** | Frees up GPU in under 2 hours | Ultra-Fast Turnaround |
-| **Storage / Scratch** | ~8.0 GB per Group (1/3 of 25 GB) | **~2.04 GB** (Data cache + checkpoints) | Leaves ~6.0 GB for peer groups | Fully Compliant |
-| **Automation** | Batch script (`bash scripts/run_sweep.sh`) | Fully non-interactive execution | No manual intervention needed | Zero TA Overhead |
-
----
-
-## 🔬 2. Research Setup & Workload Sizing
+## 🔬 1. Research Setup & Workload Sizing
 
 Our study investigates whether learnable **register tokens** (K in {0, 1, 4, 8}) act as an inductive regularizer against severe overfitting when a compact Vision Transformer is trained under extreme data starvation.
 
@@ -61,7 +33,7 @@ Our study investigates whether learnable **register tokens** (K in {0, 1, 4, 8})
 
 ---
 
-## ⏱️ 3. Step-by-Step Training Time Calculations on Shared A100 MIG (20 GB)
+## ⏱️ 2. Step-by-Step Training Time Calculations on Shared A100 MIG (20 GB)
 
 The A100 MIG instance (MIG 3g.20gb profile) delivers high-speed throughput with 42 SMs and 168 Ampere Tensor Cores with Automatic Mixed Precision (AMP).
 
@@ -104,7 +76,7 @@ The A100 MIG instance (MIG 3g.20gb profile) delivers high-speed throughput with 
 
 ---
 
-## 📊 4. Group Time Budget & Fair-Share Breakdown
+## 📊 3. Group Time Budget & Fair-Share Breakdown
 
 In a 48-hour scheduled window, each 20 GB MIG slice has 48 hours shared across 3 groups (**16.0 GPU Hours fair-share per group**):
 
@@ -117,11 +89,11 @@ Our Team's Compute Footprint within Group Allocation (16.0h Fair-Share):
 └── Unused Headroom Left for Peer Groups      : 12.00 GPU Hours (75.0% FREE for Peers)
 ```
 
-> **Key takeaway for TA:** Our team only requires **4.0 consecutive hours**, leaving **12.0 hours** of our fair share (plus the other 32 hours of the slice) completely open for the other 2 groups sharing our instance.
+Our team only requires **4.0 consecutive hours**, leaving **12.0 hours** of our fair share (plus the other 32 hours of the slice) completely open for the other 2 groups sharing our instance.
 
 ---
 
-## 💾 5. Peak Memory (VRAM) & Storage Safety Verification
+## 💾 4. Peak Memory (VRAM) & Storage Safety Verification
 
 ### A. VRAM Consumption Breakdown on A100 MIG (20 GB)
 
@@ -137,7 +109,7 @@ Our Team's Compute Footprint within Group Allocation (16.0h Fair-Share):
 | **DEDICATED MIG INSTANCE VRAM** | 20 GB HBM2 memory slice | **20.00 GB** |
 | **FREE VRAM HEADROOM** | Available buffer | **17.12 GB (85.6% Free)** |
 
-> **Conclusion on VRAM:** Peak memory is under 3.0 GB, utilizing only 14.4% of the 20 GB allocation.
+> Peak memory is under 3.0 GB, utilizing only 14.4% of the 20 GB allocation.
 
 ---
 
@@ -154,9 +126,9 @@ Our Team's Compute Footprint within Group Allocation (16.0h Fair-Share):
 
 ---
 
-## 🗓️ 6. Suggested Time Slot Scheduling for TA
+## 🗓️ 5. Suggested Time Slot Scheduling
 
-To make scheduling effortless for the course TAs across the 12 groups, we propose any **single 4-hour window** on our assigned 20 GB MIG instance between **Tuesday, 1 September and Thursday, 3 September 2026**:
+To ensure smooth scheduling across the 12 groups, we propose any **single 4-hour window** on our assigned 20 GB MIG instance between **Tuesday, 1 September and Thursday, 3 September 2026**:
 
 ```text
 Proposed 4-Hour Time Slot (Example: 10:00 – 14:00):
@@ -168,7 +140,7 @@ Proposed 4-Hour Time Slot (Example: 10:00 – 14:00):
 
 ---
 
-## 📋 7. Summary for Course Teaching Assistants (TA)
+## 📋 6. Summary for TA Scheduling
 
 1. **Cohort Sharing Alignment:** 12 course groups, 4x 20 GB MIG slices (3 groups per slice).
 2. **Exact Quota Requested:** **A single 4.0-hour time slot** on our assigned 20 GB MIG instance.
