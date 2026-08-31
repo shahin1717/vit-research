@@ -4,28 +4,37 @@
 **Track:** Track 1 — Pure Research  
 **Project Title:** Do Register Tokens Regularize Vision Transformers Under Data Scarcity?  
 **Team Members:** Shahin, Gulnisa, Narmina, Emil, Rufet  
-**Cluster Architecture:** 2x NVIDIA A100 (40 GB) partitioned into 4x MIG Instances (20 GB VRAM each, MIG 3g.20gb profile)  
+**Cohort & Cluster Partitioning:** 12 Course Groups across 2x NVIDIA A100 (40 GB) -> 4x MIG Instances (20 GB VRAM each), 3 Groups per 20 GB Slice  
 **Date:** August 31, 2026  
 **Target Submission:** Monday, 7 September 2026, 23:59  
 
 ---
 
-## 📌 1. Executive Summary & Resource Request (For TA)
+## 📌 1. Executive Summary & Cluster Allocation Request (For TA)
 
-This document details the compute allocation request, training benchmarks, and execution plan for our Deep Learning research project tailored to the class cluster: **2x NVIDIA A100 (40 GB) partitioned into 4x MIG slices of 20 GB VRAM each (MIG 3g.20gb)**.
+This document provides the formal compute request tailored to the cohort sharing model: **12 course groups sharing 2x NVIDIA A100 (40 GB) GPUs partitioned into 4x MIG slices of 20 GB VRAM each (3 groups sharing each 20 GB slice)**.
+
+### Cluster Sharing & Fair-Share Summary
+
+```text
+Class GPU Infrastructure (2x Physical A100 40GB):
+├── Physical GPU 0 (40 GB) ──┬── MIG Instance 0 (20 GB) ──► Groups 1, 2, 3
+│                            └── MIG Instance 1 (20 GB) ──► Groups 4, 5, 6
+│
+└── Physical GPU 1 (40 GB) ──┬── MIG Instance 2 (20 GB) ──► Groups 7, 8, 9
+                             └── MIG Instance 3 (20 GB) ──► Groups 10, 11, 12 [Our Team]
+```
 
 ### Quick Resource Summary Table
 
-| Parameter | Cluster Hardware Specification | Project Consumption | Headroom / Margin | Compliance Status |
+| Parameter | 3-Group Shared Slice Budget | Our Team Request | Impact on Peer Groups | Compliance Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Cluster Hardware** | **2x NVIDIA A100 (40 GB)** | 4x MIG Instances (MIG 3g.20gb profile) | 2 slices per physical A100 | Fully Supported |
-| **Assigned Instance** | **1x or 2x A100 MIG Instance (20 GB VRAM)** | Peak VRAM: **~2.88 GB – 3.20 GB** | **16.80 GB Free (84.0% Free VRAM)** | Zero Risk of OOM |
-| **Total Requested Compute** | **~2.0 Days (48 Hours allocated window)** | **4.0 MIG GPU Hours total** (12 runs + buffers) | **44.0 Hours Buffer (91.7% under ceiling)** | Highly Efficient |
-| **Wall-Clock Time (Single Instance)** | Sequential sweep execution | **96 minutes total** (12 runs * 8.0 min) | Finishes in under 2 hours | Ultra Fast |
-| **Wall-Clock Time (2x Parallel MIG)** | Parallel execution (2 instances) | **48 minutes total** (6 runs per instance) | Finishes in under 1 hour | Maximum Efficiency |
-| **Storage / NVMe Scratch** | **25.0 GB Quota** | **~2.04 GB** (Data cache + 24 weights + logs) | **22.96 GB Free Storage** | Fully Compliant |
-| **Precision Acceleration** | Ampere 3rd Gen Tensor Cores | Automatic Mixed Precision (AMP: FP16 / BF16) | Peak Tensor Throughput | Fully Enabled |
-| **Execution Mode** | Single batch runner (`bash scripts/run_sweep.sh`) | Fully non-interactive | Unattended automated runs | Zero TA Overhead |
+| **Hardware Slice** | **1x NVIDIA A100 MIG (20 GB VRAM)** | Dedicated time slot on our slice | Shared with 2 other groups | 100% Compatible |
+| **Peak VRAM Occupancy** | **20.0 GB Total Memory** | **~2.88 GB – 3.20 GB** (Batch 64 + AMP) | Leaves 16.80 GB (84% Free) | Zero Risk of OOM |
+| **Time Budget (48h Window)** | **16.0 GPU Hours per Group** (1/3 of 48h) | **4.0 GPU Hours total** (12 runs + buffer) | **Uses only 25% of our group quota** | Highly Generous to Peers |
+| **Core Sweeps Duration** | Continuous execution | **96 minutes total (1.60 GPU Hours)** | Frees up GPU in under 2 hours | Ultra-Fast Turnaround |
+| **Storage / Scratch** | ~8.0 GB per Group (1/3 of 25 GB) | **~2.04 GB** (Data cache + checkpoints) | Leaves ~6.0 GB for peer groups | Fully Compliant |
+| **Automation** | Batch script (`bash scripts/run_sweep.sh`) | Fully non-interactive execution | No manual intervention needed | Zero TA Overhead |
 
 ---
 
@@ -52,9 +61,9 @@ Our study investigates whether learnable **register tokens** (K in {0, 1, 4, 8})
 
 ---
 
-## ⏱️ 3. Step-by-Step Training Time Calculations on A100 MIG (20 GB)
+## ⏱️ 3. Step-by-Step Training Time Calculations on Shared A100 MIG (20 GB)
 
-Each A100 MIG instance (MIG 3g.20gb profile) provides 3 GPU slices (42 Streaming Multiprocessors, 168 Tensor Cores, 20 GB HBM2 memory with ~800 GB/s bandwidth).
+The A100 MIG instance (MIG 3g.20gb profile) delivers high-speed throughput with 42 SMs and 168 Ampere Tensor Cores with Automatic Mixed Precision (AMP).
 
 ### A. Per-Run Step & Epoch Calculations
 * **Batch Size:** 64 images
@@ -63,8 +72,8 @@ Each A100 MIG instance (MIG 3g.20gb profile) provides 3 GPU slices (42 Streaming
 * **Total Epochs per Run:** 50 epochs
 * **Total Training Steps per Run:** 141 steps * 50 epochs = **7,050 optimizer steps**
 
-### B. Throughput & Runtime per Epoch on A100 MIG (20 GB)
-* Forward + Backward Throughput (ViT-Tiny on 224x224 with AMP): **~1,250 images / second**
+### B. Throughput & Runtime per Epoch
+* Forward + Backward Throughput on A100 MIG with AMP: **~1,250 images / second**
 * Training Phase per Epoch: 9,000 images / 1,250 img/s = **7.20 seconds**
 * Validation Phase + Attention Entropy Extraction per Epoch: 1,000 images / 1,250 img/s = **0.80 seconds**
 * Metric Logging & Checkpoint IO Overhead: **~0.40 seconds**
@@ -77,7 +86,7 @@ Each A100 MIG instance (MIG 3g.20gb profile) provides 3 GPU slices (42 Streaming
 
 ### D. Full 12-Run Matrix Calculation on A100 MIG (20 GB)
 
-| Experiment ID | Configuration | Register Count (K) | Random Seed | Epochs | Estimated Time (1 Instance) |
+| Experiment ID | Configuration | Register Count (K) | Random Seed | Epochs | Estimated Time on MIG Slice |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **EXP-01** | Baseline (Control) | K = 0 | Seed 42 | 50 | 8.0 min (0.13 h) |
 | **EXP-02** | Baseline (Control) | K = 0 | Seed 1337 | 50 | 8.0 min (0.13 h) |
@@ -95,19 +104,20 @@ Each A100 MIG instance (MIG 3g.20gb profile) provides 3 GPU slices (42 Streaming
 
 ---
 
-## 📊 4. Total Quota Allocation (4.0 MIG GPU Hours)
+## 📊 4. Group Time Budget & Fair-Share Breakdown
+
+In a 48-hour scheduled window, each 20 GB MIG slice has 48 hours shared across 3 groups (**16.0 GPU Hours fair-share per group**):
 
 ```text
-Total Requested A100 MIG Quota: 4.0 GPU Hours
-├── Core Experimental Sweeps (12 runs * 8.0 min) : 1.60 GPU Hours (40.0%)
-├── Pilot Sanity & Pipeline Validation Passes   : 0.40 GPU Hours (10.0%)
-├── Full Evaluation, Heatmaps & Profiling       : 1.00 GPU Hours (25.0%)
-└── Hardware Contingency & Re-run Safety Buffer : 1.00 GPU Hours (25.0%)
+Our Team's Compute Footprint within Group Allocation (16.0h Fair-Share):
+├── Core 12-Run Sweeps (12 runs * 8.0 min)     : 1.60 GPU Hours (10.0% of fair-share)
+├── Pilot Sanity & Pipeline Validation Passes : 0.40 GPU Hours  (2.5% of fair-share)
+├── Full Evaluation, Heatmaps & Profiling     : 1.00 GPU Hours  (6.25% of fair-share)
+├── Contingency Safety Buffer                 : 1.00 GPU Hours  (6.25% of fair-share)
+└── Unused Headroom Left for Peer Groups      : 12.00 GPU Hours (75.0% FREE for Peers)
 ```
 
-### Scheduling Options for TA:
-* **Option A (Single 20 GB MIG Instance):** Allocate 1 instance for **4.0 consecutive hours**. Sweeps finish in 96 minutes; remaining time covers evaluations and buffer.
-* **Option B (Two 20 GB MIG Instances in Parallel):** Allocate 2 instances for **2.0 consecutive hours**. Runs EXP-01 through EXP-06 on Instance 1 and EXP-07 through EXP-12 on Instance 2. Wall-clock training finishes in **48 minutes**!
+> **Key takeaway for TA:** Our team only requires **4.0 consecutive hours**, leaving **12.0 hours** of our fair share (plus the other 32 hours of the slice) completely open for the other 2 groups sharing our instance.
 
 ---
 
@@ -127,7 +137,7 @@ Total Requested A100 MIG Quota: 4.0 GPU Hours
 | **DEDICATED MIG INSTANCE VRAM** | 20 GB HBM2 memory slice | **20.00 GB** |
 | **FREE VRAM HEADROOM** | Available buffer | **17.12 GB (85.6% Free)** |
 
-> **Conclusion on VRAM:** Peak VRAM is **under 3.0 GB**, which uses only **14.4%** of the 20 GB MIG slice, guaranteeing 100% immunity to Out-Of-Memory (OOM) failures.
+> **Conclusion on VRAM:** Peak memory is under 3.0 GB, utilizing only 14.4% of the 20 GB allocation.
 
 ---
 
@@ -140,28 +150,28 @@ Total Requested A100 MIG Quota: 4.0 GPU Hours
 | **Metrics & Log Files** | JSON logs, step histories, CSV summaries across 12 runs | ~40 MB |
 | **Attention Heatmaps & Plots** | Vector PDF plots and PNG image overlays | ~80 MB |
 | **Codebase & Virtual Env** | Project scripts, configs, and Python dependencies | ~1,200 MB (~1.2 GB) |
-| **TOTAL DISK OCCUPANCY** | Sum of all files | **~2.04 GB** (Well below 25 GB limit) |
+| **TOTAL DISK OCCUPANCY** | Sum of all files | **~2.04 GB** (Leaves ~6 GB for peer groups) |
 
 ---
 
-## 🗓️ 6. Compute Scheduling & Execution Timeline
+## 🗓️ 6. Suggested Time Slot Scheduling for TA
 
-We request that our quota be scheduled between **Tuesday, 1 September and Thursday, 3 September 2026**:
+To make scheduling effortless for the course TAs across the 12 groups, we propose any **single 4-hour window** on our assigned 20 GB MIG instance between **Tuesday, 1 September and Thursday, 3 September 2026**:
 
 ```text
-Execution Milestones on A100 MIG:
-├── Slot 1 (10:00 – 10:30) : Pilot run validation (0.4 GPU Hours) -> Verify AMP & dataset loader
-├── Slot 2 (10:30 – 12:15) : Core 12-Run Sweeps (1.60 GPU Hours) -> bash scripts/run_sweep.sh
-├── Slot 3 (12:15 – 13:15) : Attention heatmap extraction & metrics evaluation (1.00 GPU Hours)
-└── Slot 4 (13:15 – 14:15) : Safety buffer / reruns if needed (1.00 GPU Hours)
+Proposed 4-Hour Time Slot (Example: 10:00 – 14:00):
+├── 10:00 – 10:30 (0.5h) : Pilot test & AMP validation (K=0 and K=4 pilot)
+├── 10:30 – 12:15 (1.75h): Unattended 12-Run Sweeps execution (`bash scripts/run_sweep.sh`)
+├── 12:15 – 13:15 (1.0h) : Attention map generation & entropy curves evaluation
+└── 13:15 – 14:00 (0.75h): Final result verification -> Release GPU immediately to peer group
 ```
 
 ---
 
 ## 📋 7. Summary for Course Teaching Assistants (TA)
 
-1. **Exact Hardware Request:** **1x or 2x NVIDIA A100 MIG Instance (20 GB VRAM, MIG 3g.20gb profile)** from the 2x A100 40GB cluster pool.
-2. **Exact Quota Needed:** **4.0 MIG GPU Hours** (sweep training finishes in **96 min on 1 instance**, or **48 min on 2 instances**).
-3. **VRAM Safety Margin:** Occupies only **~2.88 GB** of the 20 GB allocation (**85.6% free headroom**).
-4. **Execution Guarantee:** Fully automated single-command runner (`bash scripts/run_sweep.sh`) with zero interactive supervisor overhead.
-5. **Deliverable Integration:** Checkpoint metrics and attention entropy matrices will directly populate the results tables in our paper manuscript (`paper/main.tex`) for final submission on Mon 7 Sep 2026.
+1. **Cohort Sharing Alignment:** 12 course groups, 4x 20 GB MIG slices (3 groups per slice).
+2. **Exact Quota Requested:** **A single 4.0-hour time slot** on our assigned 20 GB MIG instance.
+3. **Fairness Guarantee:** Uses only **25%** of our group's 16-hour fair-share window (leaves 75% for our 2 peer groups).
+4. **Execution Guarantee:** Fully automated batch execution (`bash scripts/run_sweep.sh`) with zero interactive supervisor overhead.
+5. **Memory Safety:** Sub-3.0 GB VRAM requirement ensures zero OOM risk.
