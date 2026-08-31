@@ -171,13 +171,13 @@ graph TD
      * `vit_tiny_k1.yaml` ($K=1$, Minimal Register Injection)
      * `vit_tiny_k4.yaml` ($K=4$, Standard Register Allocation)
      * `vit_tiny_k8.yaml` ($K=8$, Capacity Dilution Stress Test)
-   * Parameterize each config for random seeds $\{42, 1337, 2026\}$.
+   * Parameterize each config for random seeds $\{42, 1337, 3407\}$.
 2. **Automated Sweep Script (`scripts/run_sweep.sh`):**
    * Write bash script to sequentially trigger all 12 experiments:
      ```bash
      #!/bin/bash
      set -e
-     SEEDS=(42 1337 2026)
+     SEEDS=(42 1337 3407)
      REGISTERS=(0 1 4 8)
      for k in "${REGISTERS[@]}"; do
        for seed in "${SEEDS[@]}"; do

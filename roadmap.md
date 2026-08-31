@@ -90,16 +90,16 @@ gantt
 |---|---|---|---|---|
 | `EXP-01` | ViT-Tiny | 0 (Baseline) | 42 | ⏳ Pending |
 | `EXP-02` | ViT-Tiny | 0 (Baseline) | 1337 | ⏳ Pending |
-| `EXP-03` | ViT-Tiny | 0 (Baseline) | 2026 | ⏳ Pending |
+| `EXP-03` | ViT-Tiny | 0 (Baseline) | 3407 | ⏳ Pending |
 | `EXP-04` | ViT-Tiny | 1 | 42 | ⏳ Pending |
 | `EXP-05` | ViT-Tiny | 1 | 1337 | ⏳ Pending |
-| `EXP-06` | ViT-Tiny | 1 | 2026 | ⏳ Pending |
+| `EXP-06` | ViT-Tiny | 1 | 3407 | ⏳ Pending |
 | `EXP-07` | ViT-Tiny | 4 | 42 | ⏳ Pending |
 | `EXP-08` | ViT-Tiny | 4 | 1337 | ⏳ Pending |
-| `EXP-09` | ViT-Tiny | 4 | 2026 | ⏳ Pending |
+| `EXP-09` | ViT-Tiny | 4 | 3407 | ⏳ Pending |
 | `EXP-10` | ViT-Tiny | 8 | 42 | ⏳ Pending |
 | `EXP-11` | ViT-Tiny | 8 | 1337 | ⏳ Pending |
-| `EXP-12` | ViT-Tiny | 8 | 2026 | ⏳ Pending |
+| `EXP-12` | ViT-Tiny | 8 | 3407 | ⏳ Pending |
 
 - [ ] **3.3 Aggregate Metrics:**
   - Compute Mean $\pm$ Standard Deviation across seeds for each treatment arm.

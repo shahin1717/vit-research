@@ -341,7 +341,7 @@ class AttentionHookManager:
 
 ### Q5.3: How do we ensure statistical confidence?
 * **Definitive Answer:** We train 3 independent runs across fixed random seeds:
-  $$\text{Seeds} = \{42, 1337, 2026\}$$
+  $$\text{Seeds} = \{42, 1337, 3407\}$$
   All results are reported as $\text{Mean} \pm \text{Standard Deviation}$. We perform two-tailed paired $t$-tests between $K=0$ and $K \in \{1, 4, 8\}$ ($p < 0.05$).
 
 ---
@@ -386,16 +386,16 @@ graph TD
 |---|---|---|---|---|---|
 | `EXP-01` | `configs/baseline_k0.yaml` | `vit_tiny_patch16_224` | 0 | 42 | `outputs/exp01_k0_s42/metrics.json` |
 | `EXP-02` | `configs/baseline_k0.yaml` | `vit_tiny_patch16_224` | 0 | 1337 | `outputs/exp02_k0_s1337/metrics.json` |
-| `EXP-03` | `configs/baseline_k0.yaml` | `vit_tiny_patch16_224` | 0 | 2026 | `outputs/exp03_k0_s2026/metrics.json` |
+| `EXP-03` | `configs/baseline_k0.yaml` | `vit_tiny_patch16_224` | 0 | 3407 | `outputs/exp03_k0_s3407/metrics.json` |
 | `EXP-04` | `configs/vit_tiny_k1.yaml` | `vit_tiny_patch16_224` | 1 | 42 | `outputs/exp04_k1_s42/metrics.json` |
 | `EXP-05` | `configs/vit_tiny_k1.yaml` | `vit_tiny_patch16_224` | 1 | 1337 | `outputs/exp05_k1_s1337/metrics.json` |
-| `EXP-06` | `configs/vit_tiny_k1.yaml` | `vit_tiny_patch16_224` | 1 | 2026 | `outputs/exp06_k1_s2026/metrics.json` |
+| `EXP-06` | `configs/vit_tiny_k1.yaml` | `vit_tiny_patch16_224` | 1 | 3407 | `outputs/exp06_k1_s3407/metrics.json` |
 | `EXP-07` | `configs/vit_tiny_k4.yaml` | `vit_tiny_patch16_224` | 4 | 42 | `outputs/exp07_k4_s42/metrics.json` |
 | `EXP-08` | `configs/vit_tiny_k4.yaml` | `vit_tiny_patch16_224` | 4 | 1337 | `outputs/exp08_k4_s1337/metrics.json` |
-| `EXP-09` | `configs/vit_tiny_k4.yaml` | `vit_tiny_patch16_224` | 4 | 2026 | `outputs/exp09_k4_s2026/metrics.json` |
+| `EXP-09` | `configs/vit_tiny_k4.yaml` | `vit_tiny_patch16_224` | 4 | 3407 | `outputs/exp09_k4_s3407/metrics.json` |
 | `EXP-10` | `configs/vit_tiny_k8.yaml` | `vit_tiny_patch16_224` | 8 | 42 | `outputs/exp10_k8_s42/metrics.json` |
 | `EXP-11` | `configs/vit_tiny_k8.yaml` | `vit_tiny_patch16_224` | 8 | 1337 | `outputs/exp11_k8_s1337/metrics.json` |
-| `EXP-12` | `configs/vit_tiny_k8.yaml` | `vit_tiny_patch16_224` | 8 | 2026 | `outputs/exp12_k8_s2026/metrics.json` |
+| `EXP-12` | `configs/vit_tiny_k8.yaml` | `vit_tiny_patch16_224` | 8 | 3407 | `outputs/exp12_k8_s3407/metrics.json` |
 
 ---
 

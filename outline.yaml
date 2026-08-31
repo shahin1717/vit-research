@@ -4,7 +4,7 @@ target_backbone: "ViT-Tiny (timm vit_tiny_patch16_224, d=192, L=12, H=3)"
 dataset: "CIFAR-100 Stratified Low-Data Subset (100 samples/class = 10,000 images)"
 sweep_matrix:
   register_counts: [0, 1, 4, 8]
-  seeds: [42, 1337, 2026]
+  seeds: [42, 1337, 3407]
   total_runs: 12
 
 items:

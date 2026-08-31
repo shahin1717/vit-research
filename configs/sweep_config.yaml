@@ -6,7 +6,7 @@ parameters:
   num_registers:
     values: [0, 1, 4, 8]
   seed:
-    values: [42, 1337, 2026]
+    values: [42, 1337, 3407]
   backbone:
     values: ["vit_tiny_patch16_224"]
   samples_per_class:
