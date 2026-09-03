@@ -1,49 +1,84 @@
 """
-Generalization Gap Tracker
-============================
-Tracks the core quantity the whole "regularization" hypothesis hinges on:
+Generalization Gap & Overfitting Diagnostics
+============================================
+Tracks the empirical generalization gap between training and validation losses
+across epochs to test the structural regularization hypothesis of register tokens.
 
+Mathematical Formulation:
     Delta_L(epoch) = L_val(epoch) - L_train(epoch)
+    Delta_Acc(epoch) = Acc_train(epoch) - Acc_val(epoch)
 
-A smaller, more stable gap across training epochs is the evidence that
-register tokens act as a regularizer under data scarcity. A gap that
-grows quickly (train loss keeps dropping, val loss stalls/rises) is the
-signature of overfitting.
+A smaller, stable generalization gap indicates effective regularization under
+data scarcity, whereas a diverging gap indicates unconstrained overfitting.
+
+Public Interface:
+- `compute_generalization_gap`: Computes L_val - L_train.
+- `compute_accuracy_gap`: Computes Acc_train - Acc_val.
+- `GeneralizationGapTracker`: State tracker recording loss trajectories and gaps.
 """
 
 from typing import Dict, List
 
 
 def compute_generalization_gap(train_loss: float, val_loss: float) -> float:
-    """Single-epoch gap: Delta_L = L_val - L_train."""
-    return val_loss - train_loss
+    """
+    Computes single-epoch generalization loss gap: Delta_L = L_val - L_train.
+
+    :param train_loss: Scalar cross-entropy loss on the training split.
+    :param val_loss: Scalar cross-entropy loss on the validation split.
+    :return: Float difference (val_loss - train_loss).
+    """
+    return float(val_loss - train_loss)
+
+
+def compute_accuracy_gap(train_acc: float, val_acc: float) -> float:
+    """
+    Computes single-epoch generalization accuracy gap: Delta_Acc = Acc_train - Acc_val.
+
+    :param train_acc: Top-1 accuracy percentage on training split (e.g. 85.4).
+    :param val_acc: Top-1 accuracy percentage on validation split (e.g. 72.1).
+    :return: Float difference in accuracy percentage points.
+    """
+    return float(train_acc - val_acc)
 
 
 class GeneralizationGapTracker:
     """
-    Accumulates (epoch, train_loss, val_loss, gap) records across an
-    entire training run so the whole curve can be logged to disk and
-    plotted (gap vs. epoch, for each K in {0, 1, 4, 8}).
+    Tracks and aggregates (epoch, train_loss, val_loss, gap) records across
+    an entire training run for visualization, CSV export, and reporting.
     """
 
     def __init__(self):
+        """Initializes empty history record list."""
         self.history: List[Dict[str, float]] = []
 
     def update(self, epoch: int, train_loss: float, val_loss: float) -> float:
-        """Records one epoch's losses and returns that epoch's gap."""
+        """
+        Records losses for a given epoch and computes the corresponding gap.
+
+        :param epoch: Current training epoch index.
+        :param train_loss: Epoch average training loss.
+        :param val_loss: Epoch average validation loss.
+        :return: Computed generalization gap for this epoch.
+        """
         gap = compute_generalization_gap(train_loss, val_loss)
         self.history.append(
             {
-                "epoch": epoch,
-                "train_loss": train_loss,
-                "val_loss": val_loss,
-                "gap": gap,
+                "epoch": float(epoch),
+                "train_loss": float(train_loss),
+                "val_loss": float(val_loss),
+                "gap": float(gap),
             }
         )
         return gap
 
     def as_dict_of_lists(self) -> Dict[str, List[float]]:
-        """Convenience export for plotting: {'epoch': [...], 'gap': [...], ...}."""
+        """
+        Exports history as column-oriented lists for direct integration with
+        pandas or matplotlib plotting functions.
+
+        :return: Dict mapping field names to lists of values.
+        """
         if not self.history:
             return {"epoch": [], "train_loss": [], "val_loss": [], "gap": []}
         return {
@@ -52,7 +87,12 @@ class GeneralizationGapTracker:
         }
 
     def final_gap(self) -> float:
-        """Gap at the last recorded epoch -- the headline number for the report."""
+        """
+        Returns the generalization gap at the latest recorded epoch.
+
+        :return: Final epoch generalization gap.
+        :raises ValueError: If tracker history is empty.
+        """
         if not self.history:
-            raise ValueError("No epochs recorded yet.")
+            raise ValueError("Cannot retrieve final_gap: No epochs recorded in tracker history.")
         return self.history[-1]["gap"]
