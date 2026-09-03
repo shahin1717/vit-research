@@ -13,7 +13,7 @@ Each team member has dedicated task documentation containing mathematical contex
 
 | Member | Role & Ownership | Dedicated Task Files | Key Deliverables & Code |
 | :--- | :--- | :--- | :--- |
-| **Gulnisa** | **Lead Data Engineer** | [`tasks/gulnisa_data_pipeline.md`](file:///home/shahin/aiac-res/tasks/gulnisa_data_pipeline.md) | `src/data/cifar100_subset.py`<br>`src/data/__init__.py` |
+| **Gulnisa** | **Lead Data Engineer** | [`tasks/gulnisa_data_pipeline.md`](file:///home/shahin/aiac-res/tasks/gulnisa_data_pipeline.md) | `src/data/cifar100_subset.py`<br>`src/data/__init__.py`<br>*(✅ Merged into `main`)* |
 | **Narmina** | **Lead Metrics & Hooks Engineer** | [`tasks/narmina_metrics_and_hooks.md`](file:///home/shahin/aiac-res/tasks/narmina_metrics_and_hooks.md)<br>🌸 *Easy Guide:* [`tasks/narmina_guide_easy.md`](file:///home/shahin/aiac-res/tasks/narmina_guide_easy.md) | `src/models/attention_hook.py`<br>`src/metrics/*.py` |
 | **Shahin** | **Core Architecture & Training Lead** | [`tasks/shahin_core_architecture_and_training.md`](file:///home/shahin/aiac-res/tasks/shahin_core_architecture_and_training.md) | `src/models/register_vit.py`<br>`scripts/train.py`, `scripts/eval.py` |
 | **Emil** | **Sweep Orchestration & Operations** | [`tasks/emil_sweep_orchestration.md`](file:///home/shahin/aiac-res/tasks/emil_sweep_orchestration.md) | `scripts/run_sweep.sh`<br>`configs/*.yaml`, `src/utils/logger.py` |
