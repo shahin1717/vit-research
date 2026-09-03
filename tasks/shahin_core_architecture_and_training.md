@@ -18,9 +18,9 @@ Vision Transformers (Dosovitskiy et al., 2020) lack convolutional inductive bias
 Your mission is to build the core model wrapper and unified training engine to test whether register tokens act as a **structural regularizer** on compact ViTs (`vit_tiny_patch16_224`, $d=192$, 12 layers) trained under extreme data scarcity.
 
 Key Responsibilities:
-1. **`RegisterVisionTransformer` Module (`src/models/register_vit.py`):** Prepend $K \in \{0, 1, 4, 8\}$ learnable register tokens to the token sequence after patch projection and positional embedding injection, then discard the registers before the classification head.
-2. **Unified Training Loop (`scripts/train.py`):** Production-ready PyTorch training loop supporting Automatic Mixed Precision (AMP), AdamW optimizer with cosine learning rate schedule, gradient clipping, checkpoint serialization, and structured JSON metrics export.
-3. **Evaluation & Verification Harness (`scripts/eval.py`):** Model inference runner computing Top-1/Top-5 accuracy and triggering Narmina's attention hooks for layerwise entropy calculation.
+1. [x] **`RegisterVisionTransformer` Module (`src/models/register_vit.py`):** Prepend $K \in \{0, 1, 4, 8\}$ learnable register tokens to the token sequence after patch projection and positional embedding injection, then discard the registers before the classification head. (✅ Completed)
+2. [x] **Unified Training Loop (`scripts/train.py`):** Production-ready PyTorch training loop supporting Automatic Mixed Precision (AMP), AdamW optimizer with cosine learning rate schedule, gradient clipping, checkpoint serialization, and structured JSON metrics export. (✅ Completed)
+3. [x] **Evaluation & Verification Harness (`scripts/eval.py`):** Model inference runner computing Top-1/Top-5 accuracy and triggering Narmina's attention hooks for layerwise entropy calculation. (✅ Completed)
 
 ---
 
