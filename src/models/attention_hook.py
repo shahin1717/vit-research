@@ -63,6 +63,7 @@ class ViTAttentionHookManager:
         :raises AttributeError: If no transformer blocks can be discovered.
         """
         self.model = model
+        self.enabled: bool = True
         self.hooks: List[torch.utils.hooks.RemovableHandle] = []
         self.attention_maps: Dict[int, torch.Tensor] = {}
         self.intermediate_activations: Dict[int, torch.Tensor] = {}
@@ -116,6 +117,8 @@ class ViTAttentionHookManager:
         Creates a hook function for an attention module to reconstruct A^(l,h).
         """
         def hook_fn(module, input_args, output):
+            if not self.enabled:
+                return
             x = input_args[0]
             with torch.no_grad():
                 B, N, _ = x.shape
@@ -146,6 +149,8 @@ class ViTAttentionHookManager:
         Creates a hook function for the block output to capture residual activations.
         """
         def hook_fn(module, input_args, output):
+            if not self.enabled:
+                return
             with torch.no_grad():
                 # Block output tensor is the unnormalized residual stream [B, S, d]
                 if isinstance(output, torch.Tensor):
@@ -154,6 +159,14 @@ class ViTAttentionHookManager:
                     self.intermediate_activations[layer_idx] = output[0].detach().cpu()
 
         return hook_fn
+
+    def disable(self) -> None:
+        """Disables hook execution without unregistering hook handles."""
+        self.enabled = False
+
+    def enable(self) -> None:
+        """Enables hook execution."""
+        self.enabled = True
 
     def clear(self) -> None:
         """

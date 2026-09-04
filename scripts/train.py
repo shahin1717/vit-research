@@ -21,7 +21,9 @@ import json
 import logging
 import os
 import random
+import shutil
 import sys
+import time
 from pathlib import Path
 
 # Ensure project root is in sys.path for direct CLI execution
@@ -80,7 +82,14 @@ def parse_args() -> argparse.Namespace:
     """Parses command line arguments and optional YAML config."""
     parser = argparse.ArgumentParser(description="Train Vision Transformer with Registers on CIFAR-100")
     parser.add_argument("--config", type=str, default=None, help="Path to YAML experiment config")
-    parser.add_argument("--k_registers", type=int, default=None, help="Number of register tokens (0, 1, 4, 8)")
+    parser.add_argument(
+        "--k_registers",
+        "--num_registers",
+        dest="k_registers",
+        type=int,
+        default=None,
+        help="Number of register tokens (0, 1, 4, 8)",
+    )
     parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducibility")
     parser.add_argument("--epochs", type=int, default=None, help="Total training epochs")
     parser.add_argument("--batch_size", type=int, default=None, help="Mini-batch size")
@@ -126,6 +135,7 @@ def load_config(args: argparse.Namespace) -> Dict[str, Any]:
             "num_workers": 2,
             "samples_per_class": 100,
             "val_split": 0.1,
+            "image_size": 224,
         },
         "training": {
             "epochs": 50,
@@ -146,15 +156,27 @@ def load_config(args: argparse.Namespace) -> Dict[str, Any]:
     }
 
     # Merge YAML file if provided
+    yaml_cfg: Dict[str, Any] = {}
     if args.config and os.path.isfile(args.config):
         logger.info("Loading config file: %s", args.config)
         with open(args.config, "r", encoding="utf-8") as f:
-            yaml_cfg = yaml.safe_load(f)
+            yaml_cfg = yaml.safe_load(f) or {}
             for section, values in yaml_cfg.items():
                 if section in config and isinstance(values, dict):
                     config[section].update(values)
                 else:
                     config[section] = values
+
+    # Normalize YAML synonym keys for logging and data
+    log_sec = config.get("logging", {})
+    if "save_dir" in log_sec and "output_dir" not in yaml_cfg.get("logging", {}):
+        config["logging"]["output_dir"] = log_sec["save_dir"]
+    if "eval_freq_epochs" in log_sec and "eval_freq" not in yaml_cfg.get("logging", {}):
+        config["logging"]["eval_freq"] = log_sec["eval_freq_epochs"]
+
+    data_sec = config.get("data", {})
+    if "image_size" in data_sec:
+        config["model"]["img_size"] = data_sec["image_size"]
 
     # Apply CLI overrides
     if args.k_registers is not None:
@@ -201,7 +223,10 @@ def load_config(args: argparse.Namespace) -> Dict[str, Any]:
     # Standardize experiment name
     k_val = config["model"]["num_registers"]
     seed_val = config["experiment"]["seed"]
-    config["experiment"]["name"] = f"rViT_K{k_val}_seed{seed_val}"
+    if "name" not in config["experiment"] or config["experiment"]["name"] in (
+        "vit_tiny_rViT", "vit_tiny_baseline_k0", "vit_tiny_k1", "vit_tiny_k4", "vit_tiny_k8", "default"
+    ):
+        config["experiment"]["name"] = f"rViT_K{k_val}_seed{seed_val}"
 
     return config
 
@@ -312,12 +337,16 @@ def evaluate(
             total_samples += batch_size
 
             # Intercept attention matrices from the first batch
+            # Intercept attention matrices from the first batch and immediately disarm hooks
+            # to eliminate device-to-host memory transfer overhead on all subsequent batches
             if hook_mgr is not None and step == 0:
                 layerwise_entropy = compute_layerwise_entropy(hook_mgr.attention_maps)
                 layerwise_outliers = compute_layerwise_outlier_rate(
                     hook_mgr.intermediate_activations, k_registers=k_registers
                 )
+                hook_mgr.remove()
                 hook_mgr.clear()
+                hook_mgr = None
 
     finally:
         if hook_mgr is not None:
@@ -344,21 +373,40 @@ def main() -> None:
     set_seed(seed)
 
     # Prepare file paths
-    output_dir = Path(cfg["logging"]["output_dir"]) / exp_name
-    checkpoint_dir = Path(cfg["logging"]["checkpoint_dir"]) / exp_name
+    base_out = Path(cfg["logging"]["output_dir"])
+    if args.output_dir is not None and base_out.name != "outputs":
+        output_dir = base_out
+    elif base_out.name in ("outputs", "."):
+        output_dir = base_out / exp_name
+    else:
+        output_dir = base_out
+
+    base_ckpt = Path(cfg["logging"]["checkpoint_dir"])
+    if args.checkpoint_dir is not None and base_ckpt.name != "checkpoints":
+        checkpoint_dir = base_ckpt
+    elif base_ckpt.name in ("checkpoints", "."):
+        checkpoint_dir = base_ckpt / exp_name
+    else:
+        checkpoint_dir = base_ckpt
+
     output_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("=== Starting Experiment: %s ===", exp_name)
     logger.info("Device: %s | AMP: %s | Registers K=%d | Seed: %d", device, use_amp, cfg["model"]["num_registers"], seed)
 
-    # 1. Prepare Dataloaders
+    # 1. Prepare Dataloaders (Translate val_split -> train_ratio and supply image_size)
+    img_size = cfg["model"].get("img_size", cfg["data"].get("image_size", 224))
+    val_split = float(cfg["data"].get("val_split", 0.1))
+    train_ratio = 1.0 - val_split
+
     train_loader, val_loader, test_loader = get_cifar100_loaders(
         data_dir=cfg["data"]["data_dir"],
         batch_size=cfg["data"]["batch_size"],
         num_workers=cfg["data"]["num_workers"],
         samples_per_class=cfg["data"]["samples_per_class"],
-        val_split=cfg["data"]["val_split"],
+        train_ratio=train_ratio,
+        image_size=img_size,
         seed=seed,
         download=True,
     )
@@ -407,13 +455,15 @@ def main() -> None:
     # 4. Initialize Metric Trackers
     gap_tracker = GeneralizationGapTracker()
     history: List[Dict[str, Any]] = []
-    best_val_acc = 0.0
+    best_val_acc = -1.0
     best_epoch = 0
 
     csv_file = output_dir / "summary.csv"
-    with open(csv_file, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["epoch", "train_loss", "train_top1", "val_loss", "val_top1", "gen_gap", "acc_gap", "lr"])
+    train_history_file = output_dir / "train_history.csv"
+    for path_csv in (csv_file, train_history_file):
+        with open(path_csv, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["epoch", "train_loss", "train_top1", "val_loss", "val_top1", "gen_gap", "acc_gap", "lr"])
 
     # 5. Epoch Loop
     start_time = time.time()
@@ -466,10 +516,12 @@ def main() -> None:
             current_lr,
         )
 
-        # Log to CSV
-        with open(csv_file, "a", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow([epoch, f"{train_loss:.4f}", f"{train_top1:.2f}", f"{val_loss:.4f}", f"{val_top1:.2f}", f"{gen_gap:.4f}", f"{acc_gap:.2f}", f"{current_lr:.6f}"])
+        # Log to both summary.csv and train_history.csv for complete contractual compliance
+        csv_row = [epoch, f"{train_loss:.4f}", f"{train_top1:.2f}", f"{val_loss:.4f}", f"{val_top1:.2f}", f"{gen_gap:.4f}", f"{acc_gap:.2f}", f"{current_lr:.6f}"]
+        for path_csv in (csv_file, train_history_file):
+            with open(path_csv, "a", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(csv_row)
 
         # Record structured epoch history
         epoch_record = {
@@ -489,29 +541,12 @@ def main() -> None:
         }
         history.append(epoch_record)
 
-        # Save Checkpoint if best validation accuracy
-        is_best = val_top1 > best_val_acc
+        # Save Checkpoint if best validation accuracy (or first epoch)
+        is_best = (val_top1 > best_val_acc) or (epoch == 1 and best_val_acc < 0.0)
         if is_best:
             best_val_acc = val_top1
             best_epoch = epoch
-            torch.save(
-                {
-                    "epoch": epoch,
-                    "model_state_dict": model.state_dict(),
-                    "optimizer_state_dict": optimizer.state_dict(),
-                    "val_top1": val_top1,
-                    "val_loss": val_loss,
-                    "k_registers": k_registers,
-                    "seed": seed,
-                    "config": cfg,
-                },
-                checkpoint_dir / "best_model.pt",
-            )
-            logger.info("Saved new best model checkpoint (Val Acc: %.2f%%) at epoch %d.", best_val_acc, epoch)
-
-        # Save latest checkpoint
-        torch.save(
-            {
+            best_payload = {
                 "epoch": epoch,
                 "model_state_dict": model.state_dict(),
                 "optimizer_state_dict": optimizer.state_dict(),
@@ -519,15 +554,38 @@ def main() -> None:
                 "val_loss": val_loss,
                 "k_registers": k_registers,
                 "seed": seed,
-            },
-            checkpoint_dir / "latest_checkpoint.pt",
-        )
+                "config": cfg,
+            }
+            torch.save(best_payload, checkpoint_dir / "best_model.pt")
+            torch.save(best_payload, checkpoint_dir / "best_model.pth")
+            if output_dir != checkpoint_dir:
+                torch.save(best_payload, output_dir / "best_model.pth")
+                torch.save(best_payload, output_dir / "best_model.pt")
+            logger.info("Saved new best model checkpoint (Val Acc: %.2f%%) at epoch %d.", best_val_acc, epoch)
+
+        # Save latest checkpoint
+        latest_payload = {
+            "epoch": epoch,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "val_top1": val_top1,
+            "val_loss": val_loss,
+            "k_registers": k_registers,
+            "seed": seed,
+        }
+        torch.save(latest_payload, checkpoint_dir / "latest_checkpoint.pt")
+        torch.save(latest_payload, checkpoint_dir / "last_model.pth")
+        if output_dir != checkpoint_dir:
+            torch.save(latest_payload, output_dir / "last_model.pth")
+            torch.save(latest_payload, output_dir / "latest_checkpoint.pt")
 
     total_training_time = time.time() - start_time
     logger.info("Training complete in %.2f minutes. Best Val Acc: %.2f%% at epoch %d.", total_training_time / 60.0, best_val_acc, best_epoch)
 
     # 6. Final Evaluation on Untouched Test Set using Best Model
     best_ckpt_path = checkpoint_dir / "best_model.pt"
+    if not best_ckpt_path.exists():
+        best_ckpt_path = output_dir / "best_model.pth"
     if best_ckpt_path.exists():
         checkpoint = torch.load(best_ckpt_path, map_location=device)
         model.load_state_dict(checkpoint["model_state_dict"])

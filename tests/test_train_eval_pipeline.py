@@ -94,3 +94,65 @@ def test_train_and_evaluate_synthetic_step(tmp_path: Path):
     new_model.load_state_dict(loaded_checkpoint["model_state_dict"])
     out = new_model(dummy_images[:2])
     assert out.shape == (2, 100)
+
+
+def test_train_cli_num_registers_alias():
+    """Verifies that train.py CLI parser accepts --num_registers as an alias for --k_registers."""
+    from scripts.train import parse_args
+    import sys
+
+    orig_argv = sys.argv
+    try:
+        sys.argv = ["train.py", "--num_registers", "4", "--seed", "1337"]
+        args = parse_args()
+        assert args.k_registers == 4
+        assert args.seed == 1337
+    finally:
+        sys.argv = orig_argv
+
+
+def test_load_config_normalization():
+    """Verifies load_config correctly normalizes synonym keys and data parameters."""
+    from scripts.train import parse_args, load_config
+    import sys
+
+    orig_argv = sys.argv
+    try:
+        sys.argv = ["train.py", "--k_registers", "8"]
+        args = parse_args()
+        cfg = load_config(args)
+        assert cfg["model"]["num_registers"] == 8
+        assert cfg["model"]["img_size"] == 224
+        assert cfg["data"]["val_split"] == 0.1
+    finally:
+        sys.argv = orig_argv
+
+
+def test_evaluate_disarms_hooks():
+    """Verifies that evaluate() disarms attention hooks after batch 0 to prevent memory leaks."""
+    device = torch.device("cpu")
+    model = RegisterVisionTransformer(num_registers=4, pretrained=False).to(device)
+
+    # 2 batches of dummy data
+    images = torch.randn(8, 3, 224, 224)
+    labels = torch.randint(0, 100, (8,))
+    dataset = TensorDataset(images, labels)
+    loader = DataLoader(dataset, batch_size=4)
+
+    criterion = nn.CrossEntropyLoss()
+    val_loss, val_top1, val_top5, entropy, outliers = evaluate(
+        model=model,
+        val_loader=loader,
+        criterion=criterion,
+        device=device,
+        use_amp=False,
+        k_registers=4,
+        extract_attention_metrics=True,
+    )
+    assert len(entropy) == 12
+    assert len(outliers) == 12
+    # Ensure no hook handles remain attached to the model blocks
+    for block in model.blocks:
+        assert len(block._forward_hooks) == 0
+        assert len(block.attn._forward_hooks) == 0
+

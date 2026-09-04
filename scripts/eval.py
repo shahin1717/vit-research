@@ -46,8 +46,15 @@ logger = logging.getLogger("eval")
 def parse_args() -> argparse.Namespace:
     """Parses evaluation command line options."""
     parser = argparse.ArgumentParser(description="Evaluate Vision Transformer with Registers")
-    parser.add_argument("--checkpoint", type=str, required=True, help="Path to trained model checkpoint (.pt)")
-    parser.add_argument("--k_registers", type=int, default=None, help="Override register count K (0, 1, 4, 8)")
+    parser.add_argument("--checkpoint", type=str, required=True, help="Path to trained model checkpoint (.pt or .pth)")
+    parser.add_argument(
+        "--k_registers",
+        "--num_registers",
+        dest="k_registers",
+        type=int,
+        default=None,
+        help="Override register count K (0, 1, 4, 8)",
+    )
     parser.add_argument("--backbone", type=str, default="vit_tiny_patch16_224", help="ViT backbone architecture")
     parser.add_argument("--split", type=str, default="test", choices=["val", "test"], help="Dataset split to evaluate")
     parser.add_argument("--data_dir", type=str, default="./data", help="Path to dataset root directory")
@@ -87,7 +94,15 @@ def main() -> None:
     logger.info("Loading checkpoint from: %s", ckpt_path)
     checkpoint = torch.load(ckpt_path, map_location=device)
 
-    # Detect register count from checkpoint or CLI
+    # Detect register count and model settings from checkpoint or CLI
+    img_size = 224
+    backbone = args.backbone
+    if "config" in checkpoint and isinstance(checkpoint["config"], dict):
+        model_cfg = checkpoint["config"].get("model", {})
+        img_size = model_cfg.get("img_size", 224)
+        if args.backbone == "vit_tiny_patch16_224" and "backbone" in model_cfg:
+            backbone = model_cfg["backbone"]
+
     if args.k_registers is not None:
         k_registers = args.k_registers
     elif "k_registers" in checkpoint:
@@ -97,14 +112,15 @@ def main() -> None:
     else:
         k_registers = 0
 
-    logger.info("Evaluating architecture with K=%d register tokens on device: %s.", k_registers, device)
+    logger.info("Evaluating architecture %s with K=%d register tokens on device: %s.", backbone, k_registers, device)
 
     # 2. Build Model and Load Weights
     model = RegisterVisionTransformer(
-        model_name=args.backbone,
+        model_name=backbone,
         num_classes=100,
         num_registers=k_registers,
         pretrained=False,  # Weights loaded from checkpoint
+        img_size=img_size,
     ).to(device)
 
     if "model_state_dict" in checkpoint:
@@ -119,12 +135,13 @@ def main() -> None:
         data_dir=args.data_dir,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
+        image_size=img_size,
         download=True,
     )
     eval_loader = test_loader if args.split == "test" else val_loader
     logger.info("Evaluating split '%s' with %d samples across %d batches.", args.split, len(eval_loader.dataset), len(eval_loader))
 
-    # 4. Evaluation Loop with Attention Hooks
+    # 4. Evaluation Loop with Attention Hooks (Disarmed after batch 0 to prevent OOM/D2H thrash)
     criterion = nn.CrossEntropyLoss()
     total_loss = 0.0
     total_top1 = 0.0
@@ -134,7 +151,8 @@ def main() -> None:
     layerwise_entropy: Dict[int, float] = {}
     layerwise_outliers: Dict[int, float] = {}
 
-    with ViTAttentionHookManager(model) as hook_mgr:
+    hook_mgr: Optional[ViTAttentionHookManager] = ViTAttentionHookManager(model)
+    try:
         with torch.no_grad():
             for step, (images, targets) in enumerate(eval_loader):
                 images = images.to(device, non_blocking=True)
@@ -151,13 +169,19 @@ def main() -> None:
                 total_top5 += top5 * batch_size
                 total_samples += batch_size
 
-                # Intercept attention matrices & activations on batch 0
-                if step == 0:
+                # Intercept attention matrices & activations on batch 0 and immediately disarm
+                if hook_mgr is not None and step == 0:
                     layerwise_entropy = compute_layerwise_entropy(hook_mgr.attention_maps)
                     layerwise_outliers = compute_layerwise_outlier_rate(
                         hook_mgr.intermediate_activations, k_registers=k_registers
                     )
+                    hook_mgr.remove()
                     hook_mgr.clear()
+                    hook_mgr = None
+    finally:
+        if hook_mgr is not None:
+            hook_mgr.remove()
+            hook_mgr.clear()
 
     final_loss = total_loss / total_samples
     final_top1 = total_top1 / total_samples
