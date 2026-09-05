@@ -16,8 +16,8 @@ Each team member has dedicated task documentation containing mathematical contex
 | **Gulnisa** | **Lead Data Engineer** | [`tasks/gulnisa_data_pipeline.md`](file:///home/shahin/aiac-res/tasks/gulnisa_data_pipeline.md) | `src/data/cifar100_subset.py`<br>`src/data/__init__.py`<br>*(✅ Merged into `main`)* |
 | **Narmina** | **Lead Metrics & Hooks Engineer** | [`tasks/narmina_metrics_and_hooks.md`](file:///home/shahin/aiac-res/tasks/narmina_metrics_and_hooks.md)<br>🌸 *Easy Guide:* [`tasks/narmina_guide_easy.md`](file:///home/shahin/aiac-res/tasks/narmina_guide_easy.md) | `src/models/attention_hook.py`<br>`src/metrics/*.py` |
 | **Shahin** | **Core Architecture & Training Lead** | [`tasks/shahin_core_architecture_and_training.md`](file:///home/shahin/aiac-res/tasks/shahin_core_architecture_and_training.md) | `src/models/register_vit.py`<br>`scripts/train.py`, `scripts/eval.py` |
-| **Emil** | **Sweep Orchestration & Operations** | [`tasks/emil_sweep_orchestration.md`](file:///home/shahin/aiac-res/tasks/emil_sweep_orchestration.md) | `scripts/run_sweep.sh`<br>`configs/*.yaml`, `src/utils/logger.py` |
-| **Rufet** | **Visualizations & LaTeX Paper Lead** | [`tasks/rufet_visualization_paper_presentation.md`](file:///home/shahin/aiac-res/tasks/rufet_visualization_paper_presentation.md) | `scripts/visualize_attention.py`<br>`paper/`, `presentation/` |
+| **Emil** | **Sweep Execution & Experiment Operations** | [`tasks/emil_sweep_execution_and_operations.md`](emil_sweep_execution_and_operations.md) | `configs/*.yaml`<br>`scripts/run_sweep.sh`<br>`notebooks/kaggle_sweep_runner.ipynb`<br>`tests/test_sweep_contract.py`, `docs/sweep_runbook.md` |
+| **Rufet** | **Results Engine & Statistical Analysis** | [`tasks/rufet_results_engine_and_analysis.md`](rufet_results_engine_and_analysis.md) | `src/utils/logger.py`, `tests/test_sweep_aggregation.py`<br>`scripts/visualize_attention.py`, `scripts/plot_metrics.py`<br>`src/utils/export_latex.py` |
 
 ---
 
@@ -27,6 +27,7 @@ Each team member has dedicated task documentation containing mathematical contex
 Team Timeline (Aug 31 - Sep 7):
 ├── Phase 1 (Aug 31 - Sep 1) : Gulnisa (Data) & Narmina (Metrics) & Shahin (Model) complete unit tests
 ├── Phase 2 (Sep 1 - Sep 3)  : Emil runs 12-experiment sweep matrix (A100 MIG / Kaggle)
+├── Phase 2b(Sep 3)          : Rufet aggregates the 12 runs into outputs/sweep_summary.json
 ├── Phase 3 (Sep 3 - Sep 5)  : Rufet generates attention heatmaps, entropy curves, results tables
 ├── Phase 4 (Sep 5 - Sep 7)  : Team completes LaTeX paper draft & oral defense slide deck
 └── Phase 5 (Mon 7 Sep 23:59): Final Submission Due
