@@ -1,0 +1,17 @@
+# Normalize text files to LF in the repository.
+* text=auto
+
+# Shell scripts must keep LF endings: a CRLF copy committed from a Windows clone
+# fails on the Linux A100 with "$'\r': command not found".
+*.sh text eol=lf
+
+# Windows helper scripts keep CRLF.
+*.bat text eol=crlf
+
+# Binary artifacts must never be line-ending converted.
+*.pth binary
+*.pt binary
+*.png binary
+*.pdf binary
+*.npy binary
+*.npz binary
