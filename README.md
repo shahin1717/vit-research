@@ -64,7 +64,11 @@ aiac-res/
 │   └── visualize_attention.py# Generates side-by-side attention heatmaps
 │
 ├── notebooks/                # Jupyter exploration & visualization
-│   └── 01_attention_entropy_eda.ipynb # Interactive inspection of attention maps
+│   ├── 01_attention_entropy_eda.ipynb # Interactive inspection of attention maps
+│   └── kaggle_sweep_runner.ipynb      # Portable Kaggle runner for sweep subsets
+│
+├── docs/                     # Operational documentation
+│   └── sweep_runbook.md      # Sweep execution, failure handling & aggregation runbook
 │
 ├── data/                     # Local dataset storage (git-ignored, cached)
 ├── checkpoints/              # Model weights and saved checkpoints (git-ignored)
@@ -95,8 +99,16 @@ python scripts/train.py --config configs/baseline_k0.yaml
 
 ### 3. Run Full Sweep Matrix ($K \in \{0, 1, 4, 8\} 	imes 3	ext{ Seeds}$)
 ```bash
-bash scripts/run_sweep.sh
+bash scripts/run_sweep.sh              # all 12 runs, unattended
+bash scripts/run_sweep.sh --epochs 1   # fast end-to-end smoke sweep
 ```
+
+Aggregate the 12 runs into `outputs/sweep_summary.json`:
+```bash
+python src/utils/logger.py --output_dir outputs/
+```
+
+Operational details (options, failure handling, Kaggle slices): [`docs/sweep_runbook.md`](docs/sweep_runbook.md).
 
 ### 4. Evaluate & Extract Attention Metrics
 ```bash
