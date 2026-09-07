@@ -66,9 +66,17 @@ Thumbs.db
 *.swp
 *.swo
 
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.conf
+*.key
+
 # Project Local Workspace Links & Agents
 aiac-res.code-workspace
 .agents/
 .claude/
 .gemini/
 .system_generated/
+

@@ -1,6 +1,7 @@
-# Deep Learning & Vision Models
-torch>=2.1.0
-torchvision>=0.16.0
+# Deep Learning & Vision Models (CUDA 12.4 compatible)
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch>=2.1.0,<=2.6.0
+torchvision>=0.16.0,<=0.21.0
 timm>=0.9.12
 
 # Scientific Computing & Data Processing
