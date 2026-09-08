@@ -1,0 +1,108 @@
+\section{Method}
+\label{sec:method}
+
+\subsection{Register-augmented vision transformer}
+
+Let $x \in \mathbb{R}^{3 \times H \times W}$ be an input image, partitioned by a
+$16 \times 16$ patch embedding into $N = 196$ patch tokens of width $d = 192$.
+The standard ViT prepends a classification token, giving the sequence
+$[\,\texttt{[CLS]}, p_1, \dots, p_N\,]$. We insert $K$ learnable register
+tokens $r_1 \dots r_K \in \mathbb{R}^{d}$ between the two groups:
+
+\begin{equation}
+z^{(0)} = [\,\texttt{[CLS]},\; r_1, \dots, r_K,\; p_1, \dots, p_N\,] + E_{\mathrm{pos}},
+\end{equation}
+
+where positional embeddings $E_{\mathrm{pos}}$ are applied to the
+\texttt{[CLS]} and patch positions of the pretrained backbone; registers carry
+no positional embedding, as they correspond to no spatial location. The
+sequence length becomes $S = 1 + K + N$. The registers participate fully in
+every self-attention block and are discarded before the classification head,
+which reads the \texttt{[CLS]} token only. The register block is initialised
+with a truncated normal, $r_i \sim \mathcal{N}_{\mathrm{trunc}}(0, 0.02^2)$;
+zero initialisation is avoided because it makes the register columns
+indistinguishable and stalls their gradient.
+
+The parameter cost is $K \cdot d$ weights, which is negligible: $K=8$ adds
+1{,}536 parameters to a 5.54\,M-parameter model, a relative increase of
+$2.8 \times 10^{-4}$. Any measured difference between arms is therefore
+attributable to the tokens' function, not to added capacity in the usual sense.
+
+\subsection{Diagnostic measures}
+
+\subsubsection{Layer-wise attention entropy}
+For block $l$ with attention matrix
+$A^{(l)} \in \mathbb{R}^{B \times H \times S \times S}$, whose rows are
+probability distributions over keys, we compute the Shannon entropy of each row
+and average over batch, heads and query positions:
+
+\begin{equation}
+\bar{H}^{(l)} = -\frac{1}{BHS}\sum_{b,h,i}\sum_{j=1}^{S} A^{(l)}_{b,h,i,j}\log_2\!\big(A^{(l)}_{b,h,i,j} + \epsilon\big),
+\end{equation}
+
+with $\epsilon = 10^{-12}$. Units are bits. A concentrated, artifact-like
+routing pattern lowers $\bar{H}^{(l)}$; a diffuse one raises it. Because
+recent \texttt{timm} builds execute fused scaled-dot-product attention, the
+$[B,H,S,S]$ matrix is never materialised in the forward pass; our hook
+reconstructs the softmax weights from the block's own $Q$ and $K$ projections,
+reapplying the same scaling and any $q$/$k$ normalisation, so the recovered
+matrix is the one the model used.
+
+\subsubsection{Patch-norm outlier rate}
+Following the artifact definition of \cite{darcet2024registers}, we take the
+block-output residual stream $h^{(l)} \in \mathbb{R}^{B \times S \times d}$,
+restrict it to the spatial positions $1+K \dots S$, and compute per-sample the
+fraction of patch tokens whose $\ell_2$ norm exceeds three standard deviations
+above the per-sample mean:
+
+\begin{equation}
+\rho^{(l)} = \frac{1}{BN}\sum_{b}\sum_{n} \mathbf{1}\!\left[\;\lVert h^{(l)}_{b,\,K+n}\rVert_2 > \mu^{(l)}_b + 3\sigma^{(l)}_b \;\right].
+\end{equation}
+
+The offset $1+K$ matters: slicing from index 1 would count register tokens as
+image patches, and registers are expected to carry large norms by design, so
+the error would manufacture exactly the artifact the metric is meant to detect.
+
+\subsubsection{Generalization gap}
+The regularization hypothesis is stated on losses rather than accuracies,
+because loss is the quantity the optimiser acts on:
+
+\begin{equation}
+\Delta\mathcal{L}_s = \mathcal{L}^{\mathrm{val}}_{s}(e^{\star}_s) - \mathcal{L}^{\mathrm{train}}_{s}(E),
+\end{equation}
+
+where $e^{\star}_s$ is the epoch selected for seed $s$ and $E$ is the final
+epoch. The gap is formed \emph{within} a seed before any averaging. Averaging
+the two losses separately and subtracting would produce the same mean but
+destroy the pairing, and with it any valid dispersion estimate for the gap;
+since H1 is judged on that dispersion, the ordering of operations is part of
+the method rather than an implementation detail.
+
+\subsection{Statistical treatment}
+
+With three seeds per arm, an unpaired comparison of arm means is dominated by
+seed variance: the between-seed standard deviation of validation Top-1 in the
+control arm ($2.17$ pp) is an order of magnitude larger than any treatment
+effect we could plausibly detect. Every comparison in this paper is therefore
+paired. For metric $m$, arm $K$ and the shared seed set
+$\mathcal{S} = \{42, 1337, 3407\}$ we form
+
+\begin{equation}
+\delta_s = m_s(K) - m_s(0), \qquad s \in \mathcal{S},
+\end{equation}
+
+and report $\bar{\delta}$, its sample standard deviation $\hat{\sigma}_\delta$
+(with $\mathrm{ddof} = 1$), the count of seeds moving in the hypothesised
+direction, and the paired statistic
+$t = \bar{\delta} / (\hat{\sigma}_\delta / \sqrt{3})$ against Student's $t$ with
+$\mathrm{df} = 2$. Arm-level dispersion in Table~\ref{tab:main_results} uses the
+population convention ($\mathrm{ddof} = 0$), which is recorded in the emitted
+summary artifact so the estimator is never ambiguous.
+
+Two cautions apply throughout and we state them once. First,
+$\mathrm{df} = 2$ gives these tests very low power; a $p$-value here is
+effect-size evidence, not a confirmatory test. Second, we report fifteen paired
+comparisons without multiplicity correction, so an isolated small $p$ among
+them is weak evidence. Accordingly we treat the direction count---how many of
+three seeds move the same way---as the primary signal and the $p$-value as
+secondary.

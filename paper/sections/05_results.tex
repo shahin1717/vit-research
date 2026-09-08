@@ -1,0 +1,151 @@
+\section{Results}
+\label{sec:results}
+
+\input{tables/results_table}
+
+\subsection{No register configuration improves held-out accuracy}
+
+Table~\ref{tab:main_results} reports every arm on both splits. The
+register-free control attains the best held-out Top-1 accuracy,
+$75.19 \pm 0.24\%$, and the best held-out loss, $1.6357 \pm 0.0018$. The nearest
+register arm is $K=4$ at $75.06 \pm 0.33\%$; $K=1$ and $K=8$ trail by roughly
+half a point.
+
+Top-5 accuracy is the one place where a register arm leads, and we report it
+rather than omit it: $K=4$ reaches $92.54 \pm 0.23\%$ against $92.43 \pm 0.14\%$
+for the control. The lead does not hold up. Paired per seed the difference is
+$+0.11$ pp with a standard deviation of $0.39$, positive in two seeds of three,
+$t = 0.48$, $p = 0.681$ --- a spread three times the effect. The two arms that
+lose Top-1 also lose Top-5, and lose it in every seed
+($K=1$: $-0.18$ pp, 0/3; $K=8$: $-0.38$ pp, 0/3), so the ordering of the four
+arms is unchanged by the metric.
+
+Table~\ref{tab:paired_effects} makes the comparison per seed. Against the
+control, $K=1$ loses accuracy in 3 of 3 seeds
+($\bar{\delta} = -0.53$ pp, $p = 0.111$) and $K=8$ loses in 3 of 3
+($\bar{\delta} = -0.51$ pp, $p = 0.096$). $K=4$ is the only arm that is not
+consistently worse, and it is not better either: it wins on one seed of three,
+with $\bar{\delta} = -0.13$ pp and $p = 0.466$. The honest summary is that
+registers cost between zero and half a point of accuracy here, and gain nothing.
+
+\input{tables/paired_analysis}
+
+\subsection{H1: the gap does narrow --- on the validation split only}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{gen_gap_vs_registers.pdf}
+\caption{Generalization gap and held-out test loss against register count. Error
+bars are $\pm 1$ population standard deviation over the three seeds; the dotted
+line marks the control arm. The two panels disagree: the quantity H1 predicts
+should fall does fall, and the quantity that would make that fall meaningful
+does not.}
+\label{fig:gap}
+\end{figure}
+
+The generalization gap behaves exactly as H1 predicts. Every register arm sits
+below the control, and $K=4$ is lowest at $0.7680 \pm 0.0514$ against
+$0.8047 \pm 0.0628$. Paired per seed, $K=4$ narrows the gap in 3 of 3 seeds
+($\bar{\delta} = -0.0367$, $t = -4.25$, $p = 0.051$) and lowers validation loss
+in 3 of 3 seeds ($\bar{\delta} = -0.0337$, $t = -6.40$, $p = 0.024$). Taken
+alone, this is the positive result the study set out to look for.
+
+It does not survive contact with the test split. The same $K=4$ arm shows a
+paired test-loss difference of $+0.0018$ with $t = 0.25$ and $p = 0.823$: not
+merely insignificant, but centred on zero, with two of three seeds on either
+side. Fig.~\ref{fig:gap} places the two panels side by side; the left panel
+falls and the right panel does not follow it.
+
+Two observations locate the cause. First, final training loss is effectively
+identical across arms---$0.8782$, $0.8780$, $0.8812$ and $0.8829$ for
+$K = 0, 1, 4, 8$, a spread of $0.005$ against a within-arm standard deviation of
+$0.002$--$0.005$. A regularizer that reduced overfitting would be expected to
+raise training loss while lowering validation loss; here the training term does
+not move, so the entire gap reduction comes from the validation term. Second,
+the validation split is small. Its between-seed dispersion in Top-1 accuracy is
+$2.17$ pp in the control arm, against $0.24$ pp on the test split---a factor of
+nine (Fig.~\ref{fig:accuracy}). A quantity that is both used for checkpoint
+selection and measured on 1{,}000 images is a selected extremum of a noisy
+estimator, and a consistent shift in it is not by itself evidence about
+generalization.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{accuracy_vs_registers.pdf}
+\caption{Top-1 accuracy against register count on the two evaluation splits,
+drawn on a shared vertical range. The validation panel is nearly uninformative
+at this sample size; the test panel, on ten times the data, resolves the arms
+and places the control first.}
+\label{fig:accuracy}
+\end{figure}
+
+\subsection{H2: the $K=8$ arm degrades, consistent with capacity dilution}
+
+$K=8$ is the one arm with a statistically consistent negative effect on
+held-out data. Its paired test-loss difference is $+0.0203$ with the same sign
+in 3 of 3 seeds, $t = 8.37$, $p = 0.014$---the smallest $p$-value in the study,
+and the only one below $0.05$ on a test-split quantity. It also has the lowest
+Top-5 accuracy of the four arms and the lowest final-block attention entropy,
+the latter falling in 3 of 3 seeds ($\bar{\delta} = -0.0971$, $p = 0.066$). Its
+Top-1 accuracy is not the lowest: $K=1$ is marginally worse
+($74.66\%$ against $74.67\%$), a gap far inside the seed noise, so on Top-1 the
+two arms are tied for last rather than ordered.
+
+The accuracy response across $K$ is non-monotonic, as H2 predicts: it drops at
+$K=1$, partially recovers at $K=4$, and drops again at $K=8$. We report the
+non-monotonicity because it is what the hypothesis names, but with three seeds
+per arm and a total range of $0.53$ pp we do not claim the shape of the curve is
+resolved. What is resolved is the endpoint: eight registers on a $d = 192$
+backbone are measurably worse than none.
+
+\subsection{H3: no entropy-collapse effect}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{entropy_vs_layer.pdf}
+\caption{Layer-wise attention entropy. Left: absolute entropy per block, with
+$\pm 1\sigma$ bands over seeds; the four arms are visually indistinguishable.
+Right: the paired per-seed difference from the control, which is the only view
+in which effects of this size are legible.}
+\label{fig:entropy}
+\end{figure}
+
+Fig.~\ref{fig:entropy} shows the layer profile. Entropy is strongly
+depth-dependent and non-monotonic---a minimum of $3.34$ bits at block 2, a
+maximum of $6.27$ bits at block 5, and a decline through the final third---but
+that profile is a property of the pretrained backbone, not of the treatment: the
+four arms lie on top of one another. Averaged over all twelve blocks the paired
+differences are $+0.020$, $+0.001$ and $-0.025$ bits for $K = 1, 4, 8$, none
+significant. Registers do lower entropy in block 1 (by $0.19$ bits at $K=8$,
+$0.12$ at $K=4$, $0.07$ at $K=1$) and raise it in blocks 9 and 11 at
+$K \in \{1,4\}$ (largest: $+0.15$ bits at $K=1$, block 9), but no arm shows the deep-layer
+entropy \emph{rise} relative to control that H3 requires. The one consistent
+deep-layer effect runs the wrong way: $K=8$ lowers block-12 entropy in every
+seed.
+
+The patch-norm outlier rate agrees. Averaged over blocks it is
+$1.227\%$, $1.246\%$, $1.250\%$ and $1.254\%$ for $K = 0, 1, 4, 8$. The paired
+differences are positive for every register arm---the artifact rate rises
+slightly rather than falling---though none approaches significance
+($p = 0.24$ to $0.53$). We therefore find no evidence for the artifact-removal
+mechanism in this regime, in either the entropy or the outlier readout.
+
+\subsection{Optimisation behaviour}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{loss_curves.pdf}
+\caption{Seed-averaged loss trajectories, $\pm 1\sigma$ bands. Training curves
+are superimposed across arms; validation curves are dominated by the noise of a
+1{,}000-image split.}
+\label{fig:curves}
+\end{figure}
+
+Fig.~\ref{fig:curves} confirms that the arms are not distinguishable during
+optimisation either. The training trajectories coincide from the first epoch,
+which is the expected consequence of adding at most 1{,}536 parameters to a
+5.54\,M-parameter model. Validation trajectories are visibly noisy and cross
+repeatedly. Best epochs cluster late---means of $49.0$, $47.3$, $49.0$ and
+$44.7$ for $K = 0, 1, 4, 8$---so no arm was still improving materially at the
+budget boundary, and the $K=8$ arm's earlier mean best epoch is consistent with
+it having less to gain from the remaining schedule.

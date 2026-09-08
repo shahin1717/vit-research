@@ -1,0 +1,27 @@
+\begin{abstract}
+Register tokens were introduced to remove high-norm attention artifacts in
+large vision transformers trained on hundreds of millions of images. Their
+effect in the opposite regime---a small model with too little data to fit
+comfortably---has not been characterised. We ask whether registers act as a
+structural regularizer when data is scarce. We run a fully paired ablation on a
+9{,}000-image CIFAR-100 subset (100 images per class): ViT-Tiny with
+$K \in \{0, 1, 4, 8\}$ register tokens, three seeds per arm, twelve runs in
+total, every hyperparameter fixed across arms. On the untouched 10{,}000-image
+test split no register configuration improves Top-1 accuracy over the
+register-free control ($75.19 \pm 0.24\%$); the closest arm, $K=4$, reaches
+$75.06 \pm 0.33\%$, and its $+0.11$ pp Top-5 lead over the control is not
+resolvable at this sample size ($p = 0.681$). The regularization signal that motivated the study does
+appear, but only on the validation split: $K=4$ lowers validation loss in
+3 of 3 seeds ($\Delta = -0.034$, $p = 0.024$) and narrows the generalization gap
+in 3 of 3 seeds ($\Delta = -0.037$, $p = 0.051$), while its held-out test loss
+is statistically indistinguishable from the control ($\Delta = +0.002$,
+$p = 0.823$). Training loss is unchanged across all four arms to within
+$0.005$ nats, so the narrower gap is produced entirely by the validation term
+and not by reduced fitting. At $K=8$ the picture is consistent with capacity
+dilution: test loss degrades in 3 of 3 seeds ($\Delta = +0.020$, $p = 0.014$)
+and final-block attention entropy falls in 3 of 3 seeds. We conclude that in
+this regime registers do not regularize a ViT-Tiny, that an apparent
+regularization effect measured on a small validation split can fail to
+transfer, and that the benefit reported at foundation scale does not
+automatically survive the transfer to small models fine-tuned on scarce data.
+\end{abstract}

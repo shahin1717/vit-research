@@ -1,0 +1,70 @@
+\section{Introduction}
+
+Vision transformers develop a peculiar failure of interpretability at scale.
+Darcet \textit{et al.}~\cite{darcet2024registers} observed that in large
+supervised and self-supervised ViTs a small number of patch tokens acquire
+anomalously large activation norms, and that the \texttt{[CLS]} token routes a
+disproportionate share of its attention to them. These tokens sit in
+low-information image regions, carry global rather than local content, and make
+attention maps unusable as saliency evidence. The proposed remedy is
+architectural and cheap: prepend $K$ learnable \emph{register} tokens to the
+input sequence, discard them at the output, and let the model use them as the
+scratch space it was previously carving out of the image itself. At scale this
+works---the artifacts disappear and downstream performance is unaffected or
+mildly improved.
+
+The mechanism reported in that work is a \emph{cleanup} effect, demonstrated in
+a regime where the model has far more data than it can overfit. This leaves an
+obvious question unanswered. If registers absorb capacity that the model would
+otherwise spend on memorising the training set, they should behave like a
+regularizer, and the place to look for a regularizer is the regime where
+overfitting is the binding constraint: a small model trained on scarce data.
+
+We therefore ask a narrow, falsifiable question:
+
+\begin{quote}
+\textit{When a ViT is starved of data, do register tokens reduce the
+generalization gap, and does any such reduction transfer to held-out
+performance?}
+\end{quote}
+
+We test three hypotheses drawn from the original mechanism:
+
+\begin{itemize}
+\item[\textbf{H1}] \textbf{Structural regularization.} Registers reduce the
+generalization gap $\Delta\mathcal{L} = \mathcal{L}_{\mathrm{val}} -
+\mathcal{L}_{\mathrm{train}}$.
+\item[\textbf{H2}] \textbf{Capacity dilution.} At an embedding width of
+$d = 192$, a large $K$ consumes representational capacity and degrades
+accuracy, producing a non-monotonic response in $K$.
+\item[\textbf{H3}] \textbf{Entropy collapse prevention.} Registers prevent the
+layer-wise collapse of attention entropy that accompanies artifact formation.
+\end{itemize}
+
+Our contributions are:
+
+\begin{enumerate}
+\item A fully paired $4 \times 3$ ablation ($K \in \{0,1,4,8\}$, seeds
+\texttt{42}, \texttt{1337}, \texttt{3407}) on a strict 100-images-per-class
+CIFAR-100 subset, with every hyperparameter, data split and schedule held fixed
+across arms, so that $K$ is the only manipulated variable.
+\item A statistical treatment appropriate to $n = 3$: differences are formed
+\emph{within} a seed before reduction, which removes the seed variance that
+otherwise dominates the treatment effect at this sample size.
+\item A separation of validation-measured from test-measured effects. This
+separation is what turns an apparently positive result into a negative one: the
+gap reduction predicted by H1 is present and consistent on the validation
+split, and absent on the held-out test split.
+\item A negative result reported as such, with the mechanism-level evidence
+(layer-wise entropy, patch-norm outlier rates, training-loss equality) that
+distinguishes ``registers did nothing'' from ``registers helped somewhere we
+could not measure''.
+\end{enumerate}
+
+We find no configuration that beats the register-free control on held-out
+accuracy. H1 is not supported on held-out data, H2 is supported at $K=8$, and
+H3 is not supported. Section~\ref{sec:discussion} argues that the most likely
+reason is a regime mismatch rather than a refutation of
+\cite{darcet2024registers}: our backbone is ImageNet-pretrained, the registers
+are randomly initialised into it, and 50 epochs over 9{,}000 images is a short
+window in which to learn a new routing behaviour from scratch.

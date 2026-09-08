@@ -1,0 +1,51 @@
+\section{Related Work}
+
+\subsection{Vision transformers and low-data training}
+
+The ViT~\cite{dosovitskiy2021vit} replaces convolutional inductive bias with
+global self-attention over patch embeddings, and pays for it with a strong data
+appetite. DeiT~\cite{touvron2021deit} showed that heavy augmentation and
+distillation recover competitive ImageNet accuracy without external data, and
+the systematic study of Steiner \textit{et al.}~\cite{steiner2022howtotrain}
+mapped how augmentation and regularization trade against dataset size for ViTs
+of several widths. Both establish the setting we work in: when data is scarce, a
+ViT is regularization-limited rather than capacity-limited, which is exactly the
+regime in which a candidate regularizer should show its effect most clearly.
+
+\subsection{Attention artifacts and register tokens}
+
+Darcet \textit{et al.}~\cite{darcet2024registers} identified high-norm outlier
+patch tokens in DINOv2~\cite{oquab2024dinov2} and OpenCLIP, showed that these
+tokens are recycled by the network as global scratch space, and removed them by
+appending learnable register tokens. The same phenomenon has a language-model
+analogue: attention sinks~\cite{xiao2024streamingllm}, where a small number of
+positions absorb attention mass that the model has nowhere else to put, and
+massive activations~\cite{sun2024massive}, which characterises the outlier
+coordinates involved. The common thread is that the artifact is a symptom of a
+missing degree of freedom, and that supplying that degree of freedom explicitly
+removes the symptom.
+
+What none of this work reports is an effect on \emph{generalization}. In
+\cite{darcet2024registers} the register variants match or slightly exceed their
+baselines, and the argument is made on interpretability and dense-prediction
+grounds. The claim that registers reduce overfitting is a hypothesis that the
+original evidence neither establishes nor rules out, and it is the hypothesis we
+test here.
+
+\subsection{Attention entropy as a diagnostic}
+
+Attention distributions are probability vectors, so their Shannon entropy is a
+direct, parameter-free measure of how concentrated the routing is. Artifact
+formation should appear as a fall in entropy in the deeper blocks, where the
+\texttt{[CLS]} token has been observed to concentrate on a few outlier
+positions. We use layer-resolved entropy as the mechanism-level readout for H3,
+alongside the patch-norm outlier rate that defines the artifacts in
+\cite{darcet2024registers}.
+
+\subsection{Positioning}
+
+To our knowledge the register question has not been asked in the low-data,
+small-model, ImageNet-pretrained fine-tuning regime, and it has not been asked
+with a generalization-gap framing under a fixed compute budget. Our answer is
+negative, and we regard reporting it as such---rather than selecting the split
+on which the effect appears---as the contribution.

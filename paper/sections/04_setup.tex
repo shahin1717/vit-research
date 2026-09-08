@@ -1,0 +1,82 @@
+\section{Experimental Setup}
+\label{sec:setup}
+
+\subsection{Data}
+
+We use CIFAR-100~\cite{krizhevsky2009cifar} restricted to a strict low-data
+budget. From the 50{,}000-image training split we draw a stratified subset of
+100 images per class (10{,}000 images), split $90/10$ into 9{,}000 training and
+1{,}000 validation images with the class proportions preserved. The full,
+untouched 10{,}000-image test split is used once per run, after training, and is
+never consulted for model selection. Images are bicubically resized to
+$224 \times 224$ so that the pretrained patch grid and positional embeddings
+apply without interpolation. Training uses random resized crop
+($\mathrm{scale} \in [0.8, 1.0]$), horizontal flip and
+AutoAugment~\cite{cubuk2019autoaugment} with the CIFAR-10 policy; evaluation
+uses resize and centre crop only. Normalisation uses the CIFAR-100 channel
+statistics.
+
+The stratified subset is drawn under the run's own seed, so the three seeds
+differ in \emph{which} 100 images per class are selected as well as in
+initialisation and batch order. This makes the seed a genuine replicate of the
+whole experimental pipeline rather than of initialisation alone, and it is the
+main reason the between-seed dispersion is as large as it is. Within a seed the
+subset, the split and the batch order are identical across all four arms, which
+is what makes the paired comparison of Section~\ref{sec:results} a comparison of
+$K$ and of nothing else.
+
+\subsection{Model and training}
+
+The backbone is \texttt{vit\_tiny\_patch16\_224} from
+\texttt{timm}~\cite{wightman2019timm}: 12 blocks, 3 heads, $d = 192$,
+ImageNet-pretrained, with a fresh 100-way linear head. Register tokens are
+appended to this pretrained backbone and are the only randomly initialised
+parameters besides the head. Total parameter counts are 5{,}543{,}716 ($K=0$)
+through 5{,}545{,}252 ($K=8$).
+
+All arms share one configuration: 50 epochs, batch size 64,
+AdamW~\cite{loshchilov2019adamw} at $\eta = 5 \times 10^{-4}$ with weight decay
+$0.05$, cosine decay~\cite{loshchilov2017sgdr} to $\eta_{\min} = 10^{-5}$ after
+5 warmup epochs, gradient clipping at $1.0$, label smoothing
+$\varepsilon = 0.1$~\cite{szegedy2016rethinking}, and automatic mixed
+precision~\cite{micikevicius2018mixed} in PyTorch~\cite{paszke2019pytorch}.
+Because losses are label-smoothed they
+carry a constant positive floor; they are comparable across arms, which is all
+we require, but not against unsmoothed values reported elsewhere. Model
+selection takes the epoch with the lowest validation loss.
+
+\subsection{The 12-run matrix}
+
+The ablation is the full cross product of $K \in \{0, 1, 4, 8\}$ with seeds
+$\{42, 1337, 3407\}$, giving twelve runs. Each run writes its own output and
+checkpoint directory keyed by \texttt{exp\{NN\}\_k\{K\}\_s\{seed\}}, so no two
+runs of an arm can overwrite one another's checkpoints. A run is accepted only
+if it emits all four required artifacts (\texttt{metrics.json},
+\texttt{best\_model.pth}, \texttt{last\_model.pth},
+\texttt{train\_history.csv}); the runner records a failure and continues rather
+than aborting the sweep, and the aggregation step exits non-zero while any of
+the twelve is missing. All twelve completed. The twelve runs executed sequentially on one CUDA device
+for a total of $2.83$ GPU-hours, a mean of $14.1$ minutes per run; the run logs
+record the device only as \texttt{cuda} and not its model.
+
+\subsection{Where the diagnostics are measured}
+
+Attention entropy and the patch-norm outlier rate are read from the first
+evaluation batch of the test pass, 64 images, with the hooks disarmed
+immediately afterwards to bound host memory. The test loader is unshuffled, so
+this is the \emph{same} 64 images in every one of the twelve runs, which makes
+the paired entropy comparison a comparison on identical inputs. It also means
+the entropy figures are estimates from 64 images rather than from the full test
+split; Section~\ref{sec:limitations} returns to this.
+
+\subsection{Reporting pipeline}
+
+Each run emits a nested \texttt{metrics.json}. An aggregation engine recovers
+the quantities the paper needs from that structure---the validation loss at the
+selected epoch from the epoch history, the final training loss from the last
+epoch record, and the layer-resolved diagnostics from the test record---reduces
+them across seeds, and writes a single \texttt{sweep\_summary.json}. Every table
+and figure in this paper is generated from that artifact by script. The table
+generator recomputes its statistics independently from the per-run records and
+raises if they disagree with the aggregated summary, so a divergence between the
+manuscript and the data it claims to report cannot pass silently.

@@ -1,0 +1,76 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Why the effect appears on one split and not the other}
+
+The most useful thing this experiment produced is a clean instance of a common
+failure mode. Had we reported validation loss and the generalization gap---the
+two quantities our hypotheses were literally stated on---we would have
+concluded that four register tokens regularize a data-starved ViT-Tiny, with a
+consistent direction in every seed and $p = 0.024$. The test split says
+otherwise, and it says so unambiguously: the same arm's test-loss difference is
+$+0.002$ with $p = 0.823$.
+
+Three properties of the setup explain the dissociation. The validation split
+holds 1{,}000 images, one tenth of the test split, and its between-seed
+dispersion is nine times larger. The same split is used to choose the
+checkpoint, so the reported validation loss is a minimum over 50 epochs of a
+noisy sequence, and anything that changes the shape of that sequence changes its
+minimum without necessarily changing the model's quality. And the training loss
+does not move at all across arms, which removes the mechanism a real regularizer
+would have to act through: there is no trade of training fit for validation fit
+here, only a different draw from the same distribution.
+
+We draw a methodological conclusion from this rather than only a negative
+empirical one. In small-data ablations, a generalization-gap argument built on a
+validation split that also performs model selection is not evidence of
+generalization. The gap should be reported, as we do, but the claim has to be
+settled on data that no decision was taken on.
+
+\subsection{Why registers may not transfer to this regime}
+
+Our result does not contradict \cite{darcet2024registers}; it bounds where that
+mechanism applies. Four differences separate the regimes.
+
+\textbf{Pretraining mismatch.} Our backbone is ImageNet-pretrained and its
+registers are not. The pretrained weights encode 12 blocks of routing behaviour
+learned in a sequence that had no register positions in it, and the model is
+then given 50 epochs over 9{,}000 images to discover that a new set of tokens is
+available as scratch space. In \cite{darcet2024registers} the registers are
+present throughout pretraining, over datasets larger by three to four orders of
+magnitude. It would be surprising if a routing convention learned over hundreds
+of millions of images reorganised itself in this budget, and our entropy
+measurements indicate it did not: the layer-wise profile of every register arm
+is the pretrained profile.
+
+\textbf{The artifacts are present but unmoved.} Our control arm shows a
+patch-norm outlier rate of $1.23\%$, about $2.4$ of 196 patches per image. That
+is roughly nine times the $0.13\%$ a three-sigma threshold would select from
+Gaussian norms, so the heavy-tailed structure the artifact metric is designed to
+detect is genuinely there. What is absent is any response to the treatment: the
+rate is $1.25\%$ at $K=8$, and the paired differences are positive for every
+register arm. The intervention that was introduced to absorb this structure does
+not measurably absorb it here, which is a stronger negative statement than
+``there was nothing to remove''.
+
+\textbf{Capacity.} At $d = 192$ with 3 heads, eight registers occupy $4\%$ of a
+205-token sequence and compete for the same softmax mass as 196 patches. The
+$K=8$ degradation we measure is small but is the study's most statistically
+consistent effect on held-out data, and it is the direction H2 predicts.
+
+\textbf{Sequence-level dilution, not parameter count.} It is worth being precise
+about the mechanism H2 names. Registers add 1{,}536 parameters at $K=8$; no
+plausible capacity argument runs through that number. The dilution, if it is
+real, is in the attention distribution rather than in the weights: every query
+row must now allocate probability across $K$ additional keys that carry no image
+content, and at $d = 192$ the model has little margin to spare.
+
+\subsection{What a positive result would have required}
+
+If registers regularize, the signature should be a training loss that rises
+while held-out loss falls. We observe neither. A future test with a real chance
+of detecting the effect would pretrain with the registers in place, or fine-tune
+long enough for the routing to reorganise, or start from a regime where the
+artifact rate is measurably elevated in the first place. Absent one of those
+changes, adding register tokens to a pretrained small ViT and fine-tuning on
+scarce data is, on this evidence, a no-op at best.

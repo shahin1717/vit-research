@@ -1,0 +1,57 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{figures/}}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Do Register Tokens Regularize Vision Transformers Under Data Scarcity?\\
+A Controlled 12-Run Ablation on Low-Data CIFAR-100}
+
+\author{
+\IEEEauthorblockN{Shahin, Gulnisa, Narmina, Emil, and Rufet}
+\IEEEauthorblockA{\textit{DLE-AI-202: Deep Learning, Cohort I 2026}\\
+Track 1 --- Pure Research}
+}
+
+\maketitle
+
+\input{sections/00_abstract}
+
+\begin{IEEEkeywords}
+vision transformers, register tokens, attention entropy, generalization gap, low-data regime, negative results
+\end{IEEEkeywords}
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_method}
+\input{sections/04_setup}
+\input{sections/05_results}
+\input{sections/06_discussion}
+\input{sections/07_limitations}
+\input{sections/08_conclusion}
+
+\section*{Reproducibility}
+The training code, the sweep runner, the aggregation engine and the scripts that
+generate every table and figure in this paper are available at
+\url{https://github.com/shahin1717/vit-research}. Table~\ref{tab:main_results}
+and Table~\ref{tab:paired_effects} are emitted by
+\texttt{src/utils/export\_latex.py} directly from
+\texttt{outputs/sweep\_summary.json}; the figures are emitted by
+\texttt{scripts/plot\_metrics.py} from the same artifact. No number in this
+paper was transcribed by hand.
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}
