@@ -179,11 +179,17 @@ def test_outlier_rate_k_registers_offset():
     # When K=4, tokens 1..4 are registers. If a register has a huge norm,
     # it should NOT count as a SPATIAL patch outlier!
     acts = torch.randn(2, 201, 192)
-    acts[:, 2, :] *= 100.0  # Token index 2 is a REGISTER token, not spatial!
+    baseline = compute_patch_outlier_rate(acts.clone(), k_registers=4)
 
+    acts[:, 2, :] *= 100.0  # Token index 2 is a REGISTER token, not spatial!
     rate = compute_patch_outlier_rate(acts, k_registers=4)
-    # Since the outlier is on a register token, spatial outlier rate should remain ~0!
-    assert rate < 0.005
+
+    # The spike sits outside the spatial slice, so the rate must not move at all.
+    # Comparing against the same tensor's own rate rather than a fixed threshold
+    # keeps this independent of how many chance outliers the draw happens to
+    # contain: at mu + 3*sigma over 196 tokens, two spurious outliers give
+    # 2/392 = 0.0051 and would trip any threshold set near 0.005.
+    assert rate == baseline
 
 
 def test_outlier_rate_error_handling():
