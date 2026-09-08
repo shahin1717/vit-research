@@ -278,7 +278,7 @@ def export_results_table(
     tex = "\n".join(lines)
 
     os.makedirs(os.path.dirname(os.path.abspath(tex_path)), exist_ok=True)
-    with open(tex_path, "w", encoding="utf-8") as handle:
+    with open(tex_path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(tex)
     return tex
 
@@ -346,7 +346,7 @@ def export_paired_table(runs: Dict[int, Dict[int, Dict[str, float]]], tex_path: 
     tex = "\n".join(lines)
 
     os.makedirs(os.path.dirname(os.path.abspath(tex_path)), exist_ok=True)
-    with open(tex_path, "w", encoding="utf-8") as handle:
+    with open(tex_path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(tex)
     return tex
 
