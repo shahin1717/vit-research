@@ -18,7 +18,7 @@ from pathlib import Path
 
 # Ensure project root is in sys.path for direct CLI execution
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
