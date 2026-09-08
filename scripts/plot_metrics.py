@@ -61,6 +61,11 @@ RUN_DIR_PATTERN = re.compile(r"^exp(?P<idx>\d+)_k(?P<k>\d+)_s(?P<seed>\d+)$")
 ARM_COLOURS: Dict[int, str] = {0: "#d1495b", 1: "#3d6f9e", 4: "#2a9d8f", 8: "#e07a3f"}
 ARM_MARKERS: Dict[int, str] = {0: "o", 1: "s", 4: "^", 8: "D"}
 
+# Matplotlib stamps a creation timestamp into every PDF, which makes two runs
+# over identical data produce different bytes. Suppressing it lets the committed
+# figures be diffed against a fresh render as a reproducibility check.
+PDF_METADATA: Dict[str, Any] = {"CreationDate": None}
+
 
 def _arm_label(k: int) -> str:
     """Returns the legend label for a register arm."""
@@ -225,7 +230,7 @@ def plot_entropy_vs_layer(
     handles, labels = axes[0].get_legend_handles_labels()
     figure.legend(handles, labels, ncol=4, loc="lower center", bbox_to_anchor=(0.5, -0.06))
     figure.tight_layout()
-    figure.savefig(pdf_path)
+    figure.savefig(pdf_path, metadata=PDF_METADATA)
     plt.close(figure)
     return pdf_path
 
@@ -267,7 +272,7 @@ def plot_gen_gap(summary: Dict[str, Any], pdf_path: str) -> str:
         axis.set_title(title, fontsize=10)
 
     figure.tight_layout()
-    figure.savefig(pdf_path)
+    figure.savefig(pdf_path, metadata=PDF_METADATA)
     plt.close(figure)
     return pdf_path
 
@@ -301,7 +306,7 @@ def plot_loss_curves(histories: Dict[int, List[Dict[str, List[float]]]], pdf_pat
 
     axes[0].legend(ncol=2)
     figure.tight_layout()
-    figure.savefig(pdf_path)
+    figure.savefig(pdf_path, metadata=PDF_METADATA)
     plt.close(figure)
     return pdf_path
 
@@ -341,7 +346,7 @@ def plot_accuracy(summary: Dict[str, Any], pdf_path: str) -> str:
 
     axes[0].set_ylabel("Top-1 accuracy (\\%)")
     figure.tight_layout()
-    figure.savefig(pdf_path)
+    figure.savefig(pdf_path, metadata=PDF_METADATA)
     plt.close(figure)
     return pdf_path
 
