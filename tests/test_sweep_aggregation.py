@@ -36,8 +36,15 @@ LATEX_TABLE_KEYS = (
     "val_loss_mean",
     "val_loss_std",
     "gen_gap_mean",
+    "gen_gap_std",
     "entropy_mean",
     "entropy_std",
+    "test_top1_mean",
+    "test_top1_std",
+    "test_top5_mean",
+    "test_top5_std",
+    "test_loss_mean",
+    "test_loss_std",
 )
 
 NUM_LAYERS = 12
