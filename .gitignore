@@ -55,6 +55,21 @@ tb_logs/
 wandb/
 *.log
 
+# LaTeX Build Artifacts (the compiled .pdf deliverables are kept)
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
 # IDE & Operating System Files
 .DS_Store
 Thumbs.db
