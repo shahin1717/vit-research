@@ -15,3 +15,7 @@
 *.pdf binary
 *.npy binary
 *.npz binary
+
+# Manuscript sources are compiled on Linux; keep them LF.
+*.tex text eol=lf
+*.bib text eol=lf
