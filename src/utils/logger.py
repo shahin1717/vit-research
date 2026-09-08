@@ -336,6 +336,8 @@ def aggregate_sweep_results(
         entropies = column("mean_layerwise_entropy")
         outlier_rates = column("mean_layerwise_outlier_rate")
         test_accs = column("test_top1")
+        test_top5s = column("test_top5")
+        test_losses = column("test_loss")
 
         # Pair validation and training loss per seed so the gap keeps its
         # per-seed identity and yields a valid standard deviation.
@@ -352,6 +354,8 @@ def aggregate_sweep_results(
         entropy_stats = _reduce(entropies)
         outlier_stats = _reduce(outlier_rates)
         test_acc_stats = _reduce(test_accs)
+        test_top5_stats = _reduce(test_top5s)
+        test_loss_stats = _reduce(test_losses)
         gap_stats = _reduce(gaps)
 
         summary[f"k_{k}"] = {
@@ -371,6 +375,10 @@ def aggregate_sweep_results(
             "outlier_rate_std": outlier_stats["std"],
             "test_top1_mean": test_acc_stats["mean"],
             "test_top1_std": test_acc_stats["std"],
+            "test_top5_mean": test_top5_stats["mean"],
+            "test_top5_std": test_top5_stats["std"],
+            "test_loss_mean": test_loss_stats["mean"],
+            "test_loss_std": test_loss_stats["std"],
             "gen_gap_mean": gap_stats["mean"],
             "gen_gap_std": gap_stats["std"],
             "layerwise_entropy": _aggregate_layerwise(records, "layerwise_entropy"),
