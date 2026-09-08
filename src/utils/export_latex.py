@@ -126,6 +126,34 @@ def _arm_label(k: int) -> str:
     return "Baseline ($K=0$)" if k == 0 else f"Registers ($K={k}$)"
 
 
+def _assert_sweep_is_complete(summary: Dict[str, Any], runs: Dict[int, Dict[int, Dict[str, float]]]) -> None:
+    """
+    Refuses to emit a table when the sweep behind it is incomplete.
+
+    Without this guard an empty ``outputs/`` produces a zero-filled summary,
+    every statistic reduces to ``0.0``, and the comparison against that summary
+    passes because both sides are zero. The table would then be written full of
+    zeros and NaNs and would silently replace a correct one.
+
+    :param summary: Contents of ``sweep_summary.json``.
+    :param runs: Per-seed records from :func:`load_runs`.
+    :raises ValueError: If any arm has no completed seed.
+    """
+    empty = [k for k in REGISTER_ARMS if not runs.get(k)]
+    if empty:
+        arms = ", ".join(f"K={k}" for k in empty)
+        raise ValueError(
+            f"No completed runs found for {arms}. Populate outputs/ with the run "
+            f"directories and re-run src/utils/logger.py before generating tables."
+        )
+
+    missing = summary.get("meta", {}).get("missing_runs", [])
+    if missing:
+        raise ValueError(
+            "The sweep summary reports missing runs: " + ", ".join(missing)
+        )
+
+
 def _assert_matches_summary(
     summary: Dict[str, Any],
     stats: Dict[int, Dict[str, Tuple[float, float]]],
@@ -206,6 +234,7 @@ def export_results_table(
             for field, _, _, _ in columns
         }
 
+    _assert_sweep_is_complete(summary, runs)
     _assert_matches_summary(summary, stats)
 
     best = {
