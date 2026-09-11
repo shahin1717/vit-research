@@ -1,12 +1,12 @@
 \begin{table*}[t]
 \centering
-\caption{Controlled multi-seed ablation across register configurations ($K \in \{0, 1, 4, 8\}$) and data budget regimes (100 vs.\ 300 images/class on CIFAR-100, ViT-Tiny, 50 epochs). Values denote mean $\pm$ population standard deviation across seeds \texttt{42}, \texttt{1337}, and \texttt{3407}, with best performance per column highlighted in bold. Test metrics are evaluated on the untouched 10{,}000-image benchmark. The generalization gap $\Delta\mathcal{L} = \mathcal{L}_{\mathrm{val}} - \mathcal{L}_{\mathrm{train}}$ is computed within each seed before reduction. While tripling data budget raises baseline test accuracy by $+6.14\%$, register tokens provide no statistically significant accuracy or generalization advantage at either scale.}
+\caption{Controlled multi-seed ablation across register configurations ($K \in \{0, 1, 4, 8\}$) and data budget regimes (100 vs.\ 300 images/class on CIFAR-100, ViT-Tiny, 50 epochs). Values denote mean $\pm$ population standard deviation across seeds \texttt{42}, \texttt{1337}, and \texttt{3407}, with best performance per column highlighted in bold. Test metrics are evaluated on the untouched 10{,}000-image benchmark. The generalization gap $\Delta\mathcal{L} = \mathcal{L}_{\mathrm{val}} - \mathcal{L}_{\mathrm{train}}$ is computed within each seed before reduction. $\bar{H}^{(12)}$ denotes final-block (layer 12) Shannon attention entropy in bits. While tripling data budget raises baseline test accuracy by $+6.14\%$, register tokens provide no statistically significant accuracy or generalization advantage at either scale.}
 \label{tab:main_results}
 \setlength{\tabcolsep}{6pt}
 \footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Configuration} & \textbf{Test Top-1 (\%)} & \textbf{Test Loss} & \textbf{Val Loss} & \textbf{Gap $\Delta\mathcal{L}$} & \textbf{$\bar{H}^{(11/12)}$ (bits)} \\
+\textbf{Configuration} & \textbf{Test Top-1 (\%)} & \textbf{Test Loss} & \textbf{Val Loss} & \textbf{Gap $\Delta\mathcal{L}$} & \textbf{$\bar{H}^{(12)}$ (bits)} \\
 \midrule
 \multicolumn{6}{l}{\textit{Panel A: Primary Low-Data Benchmark (100 images/class, 9k train / 1k val)}} \\
 \midrule
