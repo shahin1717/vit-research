@@ -1,4 +1,4 @@
-# 📦 Team Task Package: Emil — Sweep Execution & Experiment Operations Lead
+# 📦 Team Task Package: Emil - Sweep Execution & Experiment Operations Lead
 
 **Assignee:** Emil
 **Role:** Experiment Configuration, Automation & GPU Operations Lead
@@ -60,8 +60,8 @@ per-run artifacts in `outputs/expXX_kY_sZ/`. The results engine and analysis pac
 | `EXP-11` | `configs/vit_tiny_k8.yaml` | `vit_tiny_patch16_224` | 8 | 1337 | `outputs/exp11_k8_s1337/` |
 | `EXP-12` | `configs/vit_tiny_k8.yaml` | `vit_tiny_patch16_224` | 8 | 3407 | `outputs/exp12_k8_s3407/` |
 
-The experiment index is fixed by the position in the **full** matrix. A subset run —
-one arm on Kaggle, or a re-run of a single failed seed — therefore still writes the
+The experiment index is fixed by the position in the **full** matrix. A subset run  - 
+one arm on Kaggle, or a re-run of a single failed seed - therefore still writes the
 same canonical directory names and merges back without renaming.
 
 ---
@@ -113,7 +113,7 @@ clipping at 1.0.
    slices, and `--epochs` for the smoke sweep.
 8. **Resume** (`--skip-existing`) so a partially failed matrix can be completed
    without recomputing finished runs.
-9. **Closing aggregation** — invoke `python src/utils/logger.py --output_dir outputs/`.
+9. **Closing aggregation** - invoke `python src/utils/logger.py --output_dir outputs/`.
 
 ---
 
@@ -124,10 +124,10 @@ clipping at 1.0.
    explicit cache flush guarantees zero fragmentation before the next run starts.
 3. **Structured metrics standard:** every run directory `outputs/expXX_kY_sZ/`
    must contain exactly:
-   * `metrics.json` — Top-1 accuracy, losses, entropy
-   * `best_model.pth` — weights at the best validation epoch
-   * `last_model.pth` — final-epoch checkpoint
-   * `train_history.csv` — per-epoch training and validation loss curves
+   * `metrics.json` - Top-1 accuracy, losses, entropy
+   * `best_model.pth` - weights at the best validation epoch
+   * `last_model.pth` - final-epoch checkpoint
+   * `train_history.csv` - per-epoch training and validation loss curves
 4. **Line endings:** `run_sweep.sh` must be stored with LF endings. A CRLF copy
    committed from Windows dies on the Linux A100 with `$'\r': command not found`.
 5. **Dataloader workers:** `num_workers=4` on Linux/A100, `2` on Kaggle and

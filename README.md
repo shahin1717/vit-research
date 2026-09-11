@@ -9,7 +9,7 @@
 Official experimental codebase and reproduction pipeline for the research project:
 > **"Do Register Tokens Regularize Vision Transformers Under Data Scarcity?"**  
 > *Course: DLE-AI-202: Deep Learning (Cohort I 2026)*  
-> *Track: 1 — Pure Research*  
+> *Track: 1 - Pure Research*  
 > *Obsidian Knowledge Vault: `C:\Vaults\aiac-res` (`/mnt/c/Vaults/aiac-res`)*
 
 ---

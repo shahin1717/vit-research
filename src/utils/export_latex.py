@@ -205,9 +205,9 @@ def export_results_table(
     """
     Writes the main per-arm results table.
 
-    The best value in each column is bolded. Because the columns disagree —
+    The best value in each column is bolded. Because the columns disagree  - 
     the control arm leads on the held-out split while a register arm leads on
-    the validation-derived measures — the bolding is what makes the study's
+    the validation-derived measures - the bolding is what makes the study's
     central tension visible in a single glance.
 
     :param summary: Contents of ``sweep_summary.json``.

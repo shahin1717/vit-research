@@ -1,4 +1,4 @@
-# 📦 Team Task Package: Narmina — Attention Hooks & Diagnostic Metrics Suite
+# 📦 Team Task Package: Narmina - Attention Hooks & Diagnostic Metrics Suite
 
 **Assignee:** Narmina  
 **Role:** Lead Metrics & Interpretability Engineer  

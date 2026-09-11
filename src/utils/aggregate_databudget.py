@@ -153,9 +153,9 @@ def main():
         top1_sd = e.get("test_top1_std")
         gap = e.get("gen_gap_mean")
         val_loss = e.get("val_loss_mean")
-        top1_str = f"{top1:.2f} ± {top1_sd:.2f}" if top1 is not None and top1_sd is not None else "—"
-        gap_str = f"{gap:.4f}" if gap is not None else "—"
-        val_str = f"{val_loss:.4f}" if val_loss is not None else "—"
+        top1_str = f"{top1:.2f} ± {top1_sd:.2f}" if top1 is not None and top1_sd is not None else "-"
+        gap_str = f"{gap:.4f}" if gap is not None else "-"
+        val_str = f"{val_loss:.4f}" if val_loss is not None else "-"
         print(f"K={e['num_registers']:<8}{e['n_seeds']:<7}{top1_str:<20}{gap_str:<12}{val_str:<12}")
     print("=" * 60)
 

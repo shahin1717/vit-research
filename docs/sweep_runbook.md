@@ -1,6 +1,6 @@
 # 🛠️ Sweep Operations Runbook
 
-**Owner:** Emil — Sweep Orchestration & Operations Lead
+**Owner:** Emil - Sweep Orchestration & Operations Lead
 **Scope:** `scripts/run_sweep.sh`, `configs/*.yaml`, `src/utils/logger.py`, `notebooks/kaggle_sweep_runner.ipynb`
 **Cross-references:** [Task package](../tasks/emil_sweep_execution_and_operations.md) · [Integration blockers](../tasks/INTEGRATION_BLOCKERS.md) · [Compute budget](../compute_request_and_budget.md)
 
@@ -39,10 +39,10 @@ conda activate aiac-res
 pip install -r requirements.txt
 chmod +x scripts/run_sweep.sh
 
-# 1. Preflight — never burn GPU hours on a broken tree
+# 1. Preflight - never burn GPU hours on a broken tree
 python scripts/preflight_check.py
 
-# 2. Smoke sweep — one epoch per run, exercises every arm end to end
+# 2. Smoke sweep - one epoch per run, exercises every arm end to end
 bash scripts/run_sweep.sh --epochs 1
 
 # 3. Reset the smoke artifacts, then launch the real sweep unattended
@@ -117,7 +117,7 @@ in the run directory, plus the mirrored checkpoint tree under `checkpoints/expXX
 | `outputs/expXX_kY_sZ.log` | Per-run stdout/stderr |
 | `outputs/failures.log` | Append-only failure ledger: timestamp, experiment, exit code, log path |
 
-`outputs/failures.log` is never truncated — it is the audit trail across re-runs.
+`outputs/failures.log` is never truncated - it is the audit trail across re-runs.
 
 ---
 
@@ -162,14 +162,14 @@ Writes `outputs/sweep_summary.json`, keyed `k_0`, `k_1`, `k_4`, `k_8`, each carr
 mean and population standard deviation (`numpy.std`, `ddof=0`) across the seeds that
 completed:
 
-* `val_top1_mean` / `val_top1_std` — Top-1 accuracy at the best validation epoch
-* `val_loss_mean` / `val_loss_std` — validation loss at that epoch
-* `train_loss_mean` / `train_loss_std` — final-epoch training loss
-* `gen_gap_mean` / `gen_gap_std` — per-seed `L_val − L_train`, then reduced
-* `entropy_mean` / `entropy_std` — mean layer-wise Shannon attention entropy
-* `outlier_rate_mean` / `outlier_rate_std` — mean layer-wise patch-norm outlier rate
-* `test_top1_mean` / `test_top1_std` — accuracy on the untouched 10 000-image test split
-* `layerwise_entropy` / `layerwise_outliers` — per-layer mean/std for the ±1σ error bands in the entropy-versus-layer figure
+* `val_top1_mean` / `val_top1_std` - Top-1 accuracy at the best validation epoch
+* `val_loss_mean` / `val_loss_std` - validation loss at that epoch
+* `train_loss_mean` / `train_loss_std` - final-epoch training loss
+* `gen_gap_mean` / `gen_gap_std` - per-seed `L_val − L_train`, then reduced
+* `entropy_mean` / `entropy_std` - mean layer-wise Shannon attention entropy
+* `outlier_rate_mean` / `outlier_rate_std` - mean layer-wise patch-norm outlier rate
+* `test_top1_mean` / `test_top1_std` - accuracy on the untouched 10 000-image test split
+* `layerwise_entropy` / `layerwise_outliers` - per-layer mean/std for the ±1σ error bands in the entropy-versus-layer figure
 
 The `meta` block records how many of the 12 runs were found and names the missing ones.
 Arms with no completed run are zero-filled with `num_seeds: 0` so figure and table
@@ -186,7 +186,7 @@ session. Suggested split: one arm per session (`REGISTERS = [0]`, `[1]`, `[4]`, 
 three runs each.
 
 Session requirements: *Accelerator → GPU* and *Internet → On* (CIFAR-100 download and
-the `timm` install). Keep `NUM_WORKERS = 2` — four dataloader workers deadlock on
+the `timm` install). Keep `NUM_WORKERS = 2` - four dataloader workers deadlock on
 Kaggle's shared-memory limit.
 
 Each session exports `sweep_k<arms>.zip` containing only its `outputs/expXX_kY_sZ/`

@@ -3,12 +3,12 @@
 
 \subsection{Why the effect appears on one split and not the other}
 
-The most useful thing this experiment produced is a clean instance of a common
-failure mode. Had we reported validation loss and the generalization gap---the
-two quantities our hypotheses were literally stated on---we would have
+The most useful insight this experiment produced is a clean instance of a common
+failure mode. Had we reported validation loss and the generalization gap, the
+two quantities our hypotheses were literally stated on, we would have
 concluded that four register tokens regularize a data-starved ViT-Tiny, with a
-consistent direction in every seed and $p = 0.024$. The test split says
-otherwise, and it says so unambiguously: the same arm's test-loss difference is
+consistent direction in every seed and $p = 0.024$. The test split demonstrates
+otherwise, and it does so unambiguously: the same arm's test-loss difference is
 $+0.002$ with $p = 0.823$.
 
 Three properties of the setup explain the dissociation. The validation split
@@ -17,15 +17,18 @@ dispersion is nine times larger. The same split is used to choose the
 checkpoint, so the reported validation loss is a minimum over 50 epochs of a
 noisy sequence, and anything that changes the shape of that sequence changes its
 minimum without necessarily changing the model's quality. And the training loss
-does not move at all across arms, which removes the mechanism a real regularizer
+does not move at all across arms, which removes the mechanism a genuine regularizer
 would have to act through: there is no trade of training fit for validation fit
-here, only a different draw from the same distribution.
+here, only a different draw from the same distribution. Furthermore, scaling the
+training budget to 300 images per class confirms that this dissociation is not
+simply an artifact of extreme starvation: when overall performance scales by
+$+6.14\%$, the held-out null result persists intact.
 
 We draw a methodological conclusion from this rather than only a negative
 empirical one. In small-data ablations, a generalization-gap argument built on a
 validation split that also performs model selection is not evidence of
 generalization. The gap should be reported, as we do, but the claim has to be
-settled on data that no decision was taken on.
+settled on held-out data that played no role in checkpoint selection.
 
 \subsection{Why registers may not transfer to this regime}
 

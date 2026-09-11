@@ -15,7 +15,7 @@ Top-5 accuracy is the one place where a register arm leads, and we report it
 rather than omit it: $K=4$ reaches $92.54 \pm 0.23\%$ against $92.43 \pm 0.14\%$
 for the control. The lead does not hold up. Paired per seed the difference is
 $+0.11$ pp with a standard deviation of $0.39$, positive in two seeds of three,
-$t = 0.48$, $p = 0.681$ --- a spread three times the effect. The two arms that
+$t = 0.48$, $p = 0.681$, with a spread three times the effect. The two arms that
 lose Top-1 also lose Top-5, and lose it in every seed
 ($K=1$: $-0.18$ pp, 0/3; $K=8$: $-0.38$ pp, 0/3), so the ordering of the four
 arms is unchanged by the metric.
@@ -30,7 +30,7 @@ registers cost between zero and half a point of accuracy here, and gain nothing.
 
 \input{tables/paired_analysis}
 
-\subsection{H1: the gap does narrow --- on the validation split only}
+\subsection{H1: Generalization Gap Narrows on Validation Only}
 
 \begin{figure}[t]
 \centering
@@ -57,13 +57,13 @@ side. Fig.~\ref{fig:gap} places the two panels side by side; the left panel
 falls and the right panel does not follow it.
 
 Two observations locate the cause. First, final training loss is effectively
-identical across arms---$0.8782$, $0.8780$, $0.8812$ and $0.8829$ for
-$K = 0, 1, 4, 8$, a spread of $0.005$ against a within-arm standard deviation of
+identical across arms ($0.8782$, $0.8780$, $0.8812$, and $0.8829$ for
+$K = 0, 1, 4, 8$), showing a narrow spread of $0.005$ against a within-arm standard deviation of
 $0.002$--$0.005$. A regularizer that reduced overfitting would be expected to
 raise training loss while lowering validation loss; here the training term does
 not move, so the entire gap reduction comes from the validation term. Second,
 the validation split is small. Its between-seed dispersion in Top-1 accuracy is
-$2.17$ pp in the control arm, against $0.24$ pp on the test split---a factor of
+$2.17$ pp in the control arm, against $0.24$ pp on the test split, representing a factor of
 nine (Fig.~\ref{fig:accuracy}). A quantity that is both used for checkpoint
 selection and measured on 1{,}000 images is a selected extremum of a noisy
 estimator, and a consistent shift in it is not by itself evidence about
@@ -83,8 +83,7 @@ and places the control first.}
 
 $K=8$ is the one arm with a statistically consistent negative effect on
 held-out data. Its paired test-loss difference is $+0.0203$ with the same sign
-in 3 of 3 seeds, $t = 8.37$, $p = 0.014$---the smallest $p$-value in the study,
-and the only one below $0.05$ on a test-split quantity. It also has the lowest
+in 3 of 3 seeds, $t = 8.37$, $p = 0.014$, representing the smallest $p$-value in the study and the only one below $0.05$ on a test-split quantity. It also has the lowest
 Top-5 accuracy of the four arms and the lowest final-block attention entropy,
 the latter falling in 3 of 3 seeds ($\bar{\delta} = -0.0971$, $p = 0.066$). Its
 Top-1 accuracy is not the lowest: $K=1$ is marginally worse
@@ -111,8 +110,8 @@ in which effects of this size are legible.}
 \end{figure}
 
 Fig.~\ref{fig:entropy} shows the layer profile. Entropy is strongly
-depth-dependent and non-monotonic---a minimum of $3.34$ bits at block 2, a
-maximum of $6.27$ bits at block 5, and a decline through the final third---but
+depth-dependent and non-monotonic (reaching a minimum of $3.34$ bits at block 2, a
+maximum of $6.27$ bits at block 5, and declining through the final third), but
 that profile is a property of the pretrained backbone, not of the treatment: the
 four arms lie on top of one another. Averaged over all twelve blocks the paired
 differences are $+0.020$, $+0.001$ and $-0.025$ bits for $K = 1, 4, 8$, none
@@ -125,8 +124,7 @@ seed.
 
 The patch-norm outlier rate agrees. Averaged over blocks it is
 $1.227\%$, $1.246\%$, $1.250\%$ and $1.254\%$ for $K = 0, 1, 4, 8$. The paired
-differences are positive for every register arm---the artifact rate rises
-slightly rather than falling---though none approaches significance
+differences are positive for every register arm, showing a slight increase rather than a decrease in outlier frequency, though none approaches significance
 ($p = 0.24$ to $0.53$). We therefore find no evidence for the artifact-removal
 mechanism in this regime, in either the entropy or the outlier readout.
 
@@ -145,7 +143,30 @@ Fig.~\ref{fig:curves} confirms that the arms are not distinguishable during
 optimisation either. The training trajectories coincide from the first epoch,
 which is the expected consequence of adding at most 1{,}536 parameters to a
 5.54\,M-parameter model. Validation trajectories are visibly noisy and cross
-repeatedly. Best epochs cluster late---means of $49.0$, $47.3$, $49.0$ and
-$44.7$ for $K = 0, 1, 4, 8$---so no arm was still improving materially at the
+repeatedly. Best epochs cluster late (means of $49.0$, $47.3$, $49.0$, and
+$44.7$ for $K = 0, 1, 4, 8$), indicating that no arm was still improving materially at the
 budget boundary, and the $K=8$ arm's earlier mean best epoch is consistent with
 it having less to gain from the remaining schedule.
+
+\subsection{Data Budget Scaling: Scale Invariance at 300 Images/Class}
+\label{sec:scaling}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{accuracy_100_vs_300.pdf}
+\caption{Held-out test Top-1 accuracy across register configurations under two data scarcity regimes (100 vs.\ 300 images per class). While relaxing data scarcity improves baseline accuracy by $+6.14\%$ across the board, register tokens produce no statistically significant gain over the $K=0$ control at either scale.}
+\label{fig:accuracy_scaling}
+\end{figure}
+
+A reasonable hypothesis is that extreme data starvation at 100 images per class could mask register utility through severe underfitting. To test whether the empirical null result is scale-invariant, we extended our study by tripling the training budget to 300 images per class ($30{,}000$ images total: $27{,}000$ training and $3{,}000$ validation images). We executed an identical 12-run ablation matrix across all four treatment arms ($K \in \{0, 1, 4, 8\}$) and the same three random seeds.
+
+Table~\ref{tab:main_results} (Panel B) and Fig.~\ref{fig:accuracy_scaling} present the comparative scaling outcomes. As expected under standard empirical scaling laws, tripling the available data substantially improves representation quality across all arms: baseline test accuracy increases by $+6.14$ percentage points ($75.19 \pm 0.24\% \to 81.33 \pm 0.37\%$), while validation loss drops from $1.6829$ to $1.4203$.
+
+Crucially, the relative ordering and comparative efficacy of register tokens remain unchanged:
+\begin{enumerate}
+\item \textbf{No Top-1 Accuracy Gain:} The register-free control ($K=0$) maintains the highest mean test accuracy at $81.33 \pm 0.37\%$. Both $K=1$ ($81.23 \pm 0.19\%$) and $K=4$ ($81.23 \pm 0.18\%$) perform marginally below control, while $K=8$ remains the lowest-performing arm ($81.02 \pm 0.45\%$).
+\item \textbf{Lack of Paired Consistency:} In paired per-seed analysis, registers gain nothing: $K=1$ and $K=4$ win on only 1 of 3 seeds ($\bar{\delta} = -0.10$ pp), while $K=8$ loses on 3 of 3 seeds ($\bar{\delta} = -0.31$ pp). None of the differences reach statistical significance ($p > 0.50$).
+\item \textbf{Entropy Uniformity:} Layer-11 Shannon attention entropy remains uniform across configurations ($5.002$ bits for $K=0$ versus $4.910$, $4.933$, and $4.843$ bits for $K \in \{1, 4, 8\}$).
+\end{enumerate}
+
+These scaling experiments demonstrate that the lack of regularization is not an artifact of extreme starvation at 100 images per class. Across both low-data and moderate-data regimes, register tokens fail to confer generalization benefits to compact vision transformers.

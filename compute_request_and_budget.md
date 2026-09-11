@@ -1,7 +1,7 @@
 # 🖥️ GPU Compute Resource Request & Training Budget Documentation
 
 **Course:** DLE-AI-202 (Deep Learning), Cohort I 2026  
-**Track:** Track 1 — Pure Research  
+**Track:** Track 1 - Pure Research  
 **Project Title:** Do Register Tokens Regularize Vision Transformers Under Data Scarcity?  
 **Team Members:** Shahin, Gulnisa, Narmina, Emil, Rufet  
 **Cluster Setup:** 12 Groups sharing 2x NVIDIA A100 (40 GB) -> 4x MIG Instances (20 GB VRAM each, 3 Groups per 20 GB Slice)  
@@ -17,7 +17,7 @@ Our study investigates whether learnable **register tokens** (K in {0, 1, 4, 8})
 ### Controlled Independent Variables:
 1. **Model Backbone:** ViT-Tiny (timm: `vit_tiny_patch16_224`), 12 transformer layers, 3 attention heads, embedding dimension d = 192, **5.71 Million parameters**.
 2. **Register Token Allocations (4 treatment arms):**
-   * Arm 1: K = 0 (Control Baseline — register-free ViT-Tiny)
+   * Arm 1: K = 0 (Control Baseline - register-free ViT-Tiny)
    * Arm 2: K = 1 (Minimal register injection)
    * Arm 3: K = 4 (Standard register allocation)
    * Arm 4: K = 8 (Capacity dilution stress test)

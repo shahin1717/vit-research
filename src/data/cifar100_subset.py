@@ -171,7 +171,7 @@ def get_cifar100_loaders(
     """
     train_transform, eval_transform = get_cifar100_transforms(image_size)
 
-    # Base datasets loaded WITHOUT a transform — transforms are applied
+    # Base datasets loaded WITHOUT a transform - transforms are applied
     # exclusively via TransformDataset, per split.
     full_train = torchvision.datasets.CIFAR100(
         root=data_dir, train=True, download=download, transform=None

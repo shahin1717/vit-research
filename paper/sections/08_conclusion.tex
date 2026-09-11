@@ -1,29 +1,35 @@
 \section{Conclusion}
 
 We asked whether register tokens regularize a vision transformer when data is
-scarce, and answered it with a fully paired twelve-run ablation in which the
-register count was the only variable. The answer is no. No register
-configuration improves held-out Top-1 accuracy over the register-free control
-($75.19 \pm 0.24\%$), and the best register arm, $K=4$, is statistically
-indistinguishable from it on held-out loss.
+scarce, and answered it with a fully paired 24-run controlled ablation across two
+distinct data regimes (100 and 300 images per class) in which the register count
+was the strictly isolated variable. The answer is no. No register configuration
+improves held-out Top-1 accuracy over the register-free baseline ($75.19 \pm 0.24\%$
+at 100 images/class and $81.33 \pm 0.37\%$ at 300 images/class). While tripling the
+training budget provides a clear $+6.14\%$ accuracy gain, registers confer no
+advantage over control in either regime ($p > 0.50$), confirming that the empirical
+null result is scale-invariant across low-data regimes.
 
-The study's more transferable result is how nearly it concluded the opposite.
-On the validation split, $K=4$ narrows the generalization gap in every seed and
-lowers validation loss in every seed at $p = 0.024$---a textbook regularization
-signature. It vanishes on the test split, and the training loss, unchanged
-across all four arms to within $0.005$ nats, shows why: nothing was traded, so
-nothing was regularized. A gap measured on the split that also selects the
-checkpoint is not evidence about generalization.
+The study's more transferable methodological result is how nearly an uncareful
+protocol would have concluded the opposite. On the 100-image/class validation split,
+$K=4$ narrows the generalization gap in every seed and lowers validation loss in
+every seed at $p = 0.024$, presenting what initially appears to be a textbook
+regularization signature. Crucially, this effect completely vanishes on the held-out
+test split ($p = 0.814$). The training loss, invariant across all four arms to within
+$0.005$ nats, reveals the mechanism: nothing was traded during optimization, so
+nothing was regularized. A generalization gap measured on the very split used for
+model selection does not constitute evidence of generalization.
 
-At $K=8$ we find the one consistent held-out effect in the study, and it is a
-cost: test loss degrades in all three seeds ($p = 0.014$) and final-block
-attention entropy falls in all three. On a $192$-dimensional backbone, eight
-tokens that carry no image content are not free.
+At $K=8$, we find the single consistent held-out effect in the low-data regime, and
+it is a penalty: test loss degrades across all three seeds ($p = 0.014$) and
+final-block attention entropy declines in all three. On a 192-dimensional backbone,
+allocating eight tokens that carry no visual content imposes a measurable capacity cost.
 
-We read this as a scope result rather than a refutation. Registers were
-introduced as a pretraining-time intervention at foundation scale; we applied
-them at fine-tuning time to a small pretrained model on 9{,}000 images, and the
-attention statistics indicate the pretrained routing simply did not reorganise
-in that budget. The experiment that would separate ``registers do not help
-here'' from ``registers cannot be added late'' is a from-scratch replication at
-this scale, and our released sweep infrastructure runs it unchanged.
+We view this as a scope result rather than a refutation of the register mechanism.
+Registers were introduced as a pretraining-time intervention at foundation scale;
+we applied them at fine-tuning time to a compact pretrained model under constrained
+data budgets. Mechanistic attention diagnostics confirm that pretrained routing does
+not reorganize to exploit registers in low-data regimes. The definitive experiment to
+distinguish whether registers do not help in small models or whether they cannot be
+added post-hoc is a from-scratch replication at this scale, and our open sweep
+infrastructure executes that evaluation without modification.

@@ -1,4 +1,4 @@
-# 🚧 Integration Blockers & Observations — Sweep Layer
+# 🚧 Integration Blockers & Observations - Sweep Layer
 
 **Raised by:** Emil (Sweep Orchestration & Operations Lead)
 **Reviewed & Fixed by:** Shahin (Core Architecture Lead)
@@ -26,27 +26,27 @@ All 29 pytest unit & integration tests pass cleanly (`29 passed in 9.31s`).
 
 ---
 
-## 🟢 RESOLVED: BLOCKER-1 — `scripts/train.py` crashes with `NameError: name 'time' is not defined`
+## 🟢 RESOLVED: BLOCKER-1 - `scripts/train.py` crashes with `NameError: name 'time' is not defined`
 * **Resolution:** Added `import time` and `import shutil` to `scripts/train.py:25`. Verified via preflight AST import checker and full execution pass.
 
 ---
 
-## 🟢 RESOLVED: BLOCKER-2 — `scripts/train.py` passes argument dataloader does not accept
+## 🟢 RESOLVED: BLOCKER-2 - `scripts/train.py` passes argument dataloader does not accept
 * **Resolution:** Translated `val_split` to `train_ratio = 1.0 - float(cfg["data"].get("val_split", 0.1))` and passed `image_size=img_size` to `get_cifar100_loaders(...)`.
 
 ---
 
-## 🟢 RESOLVED: OBS-1 — `model.img_size` never reaches data pipeline
+## 🟢 RESOLVED: OBS-1 - `model.img_size` never reaches data pipeline
 * **Resolution:** Forwarded `img_size = cfg["model"].get("img_size", cfg["data"].get("image_size", 224))` to `get_cifar100_loaders(...)` in both `scripts/train.py` and `scripts/eval.py`.
 
 ---
 
-## 🟢 RESOLVED: OBS-2 — Attention hooks stay armed for the entire evaluation loop
+## 🟢 RESOLVED: OBS-2 - Attention hooks stay armed for the entire evaluation loop
 * **Resolution:** In `evaluate()` (`scripts/train.py` and `scripts/eval.py`), added immediate hook disarming and detachment after batch 0 (`hook_mgr.remove(); hook_mgr.clear(); hook_mgr = None`). Batches 1..N run in clean native mode without memory retention or D2H transfers.
 
 ---
 
-## 🟢 RESOLVED: OBS-3 — Artifact naming contract synchronization
+## 🟢 RESOLVED: OBS-3 - Artifact naming contract synchronization
 * **Resolution:**
   - Standardized CLI output dir handling: when `--output_dir outputs/expXX_kY_sZ` is supplied, files are saved directly into that run directory.
   - Checkpoint dual-naming: saves both `best_model.pth` and `best_model.pt`, and both `last_model.pth` and `latest_checkpoint.pt` to both `checkpoint_dir` and `output_dir`.
@@ -60,7 +60,7 @@ All 29 pytest unit & integration tests pass cleanly (`29 passed in 9.31s`).
 
 `time.time()` is used at lines **419, 421, 454, 526** but the `time` module is
 never imported. Every run dies at the start of the epoch loop, *after* the
-dataset download and model build — so the failure surfaces minutes into each run.
+dataset download and model build - so the failure surfaces minutes into each run.
 
 ```
 Traceback (most recent call last):
@@ -70,7 +70,7 @@ Traceback (most recent call last):
 NameError: name 'time' is not defined
 ```
 
-### Fix — add one line to the import block (around line 24)
+### Fix - add one line to the import block (around line 24)
 
 ```diff
  import os
@@ -82,14 +82,14 @@ NameError: name 'time' is not defined
 
 ---
 
-## 🔴 BLOCKER-2 — `scripts/train.py` passes an argument the data loader does not accept
+## 🔴 BLOCKER-2 - `scripts/train.py` passes an argument the data loader does not accept
 
 **Owner:** Shahin (call site) / Gulnisa (signature) · **File:** `scripts/train.py:356`
 **Severity:** fatal, 100 % of runs
 
 `train.py` calls `get_cifar100_loaders(..., val_split=...)`, but
 `src/data/cifar100_subset.py::get_cifar100_loaders` has no `val_split`
-parameter — it splits with `train_ratio` instead.
+parameter - it splits with `train_ratio` instead.
 
 | | |
 |---|---|
@@ -100,7 +100,7 @@ parameter — it splits with `train_ratio` instead.
 TypeError: get_cifar100_loaders() got an unexpected keyword argument 'val_split'
 ```
 
-### Fix — translate the config key to the loader's parameter (line ~356)
+### Fix - translate the config key to the loader's parameter (line ~356)
 
 ```diff
      train_loader, val_loader, test_loader = get_cifar100_loaders(
@@ -133,7 +133,7 @@ reports **"No blocking issues. The sweep is safe to launch."**
 
 ---
 
-## 🟡 OBS-1 — `model.img_size` never reaches the data pipeline
+## 🟡 OBS-1 - `model.img_size` never reaches the data pipeline
 
 **Owner:** Shahin · **File:** `scripts/train.py:356`
 
@@ -146,7 +146,7 @@ includes the one-line fix.
 
 ---
 
-## 🟡 OBS-2 — Attention hooks stay armed for the entire evaluation loop
+## 🟡 OBS-2 - Attention hooks stay armed for the entire evaluation loop
 
 **Owner:** Narmina (hook manager) / Shahin (call site)
 **Files:** `src/models/attention_hook.py`, `scripts/train.py::evaluate`
@@ -170,7 +170,7 @@ For ViT-Tiny (H = 3) at `batch_size = 64`, `S = 197` (K = 0):
   **per epoch**, ×50 epochs ×12 runs.
 * **Final test evaluation** (10 000 images ≈ 157 batches): ≈ 56 GB in one pass.
 
-Nothing breaks — the dictionary is simply overwritten each batch — but this is
+Nothing breaks - the dictionary is simply overwritten each batch - but this is
 easily the single largest avoidable cost in the whole sweep, and it inflates my
 compute-budget estimate materially.
 
@@ -194,7 +194,7 @@ Alternatively add an `enabled` flag to the manager that the hook body checks.
 
 ---
 
-## 🟡 OBS-3 — Artifact naming differs from the agreed contract
+## 🟡 OBS-3 - Artifact naming differs from the agreed contract
 
 **Owner:** Shahin · **File:** `scripts/train.py`
 
@@ -219,11 +219,11 @@ exists so nobody is surprised by the two layouts coexisting.
 
 ## ✅ Checked and found correct
 
-* `scripts/eval.py` — all `get_cifar100_loaders()` keywords match the signature; all modules imported.
-* `src/data/cifar100_subset.py` — stratified split is deterministic and leak-free for seeds 42 / 1337 / 3407.
-* `scripts/train.py` CLI — exposes `--config`, `--k_registers`, `--seed`, `--epochs`, `--output_dir`, `--checkpoint_dir`, so `run_sweep.sh` drives it without any wrapper.
-* `--amp` / `--pretrained` (`action="store_true"` with `default=None`) — the
+* `scripts/eval.py` - all `get_cifar100_loaders()` keywords match the signature; all modules imported.
+* `src/data/cifar100_subset.py` - stratified split is deterministic and leak-free for seeds 42 / 1337 / 3407.
+* `scripts/train.py` CLI - exposes `--config`, `--k_registers`, `--seed`, `--epochs`, `--output_dir`, `--checkpoint_dir`, so `run_sweep.sh` drives it without any wrapper.
+* `--amp` / `--pretrained` (`action="store_true"` with `default=None`) - the
   `is not None` guards do correctly distinguish "flag absent" from "flag passed".
-* `src/models/register_vit.py` — register tokens are inserted after `_pos_embed`
+* `src/models/register_vit.py` - register tokens are inserted after `_pos_embed`
   and the classifier reads index 0, matching the sequence
   `[CLS ‖ R₁..R_K ‖ patches]` that `compute_patch_outlier_rate(k_registers=K)` assumes.

@@ -1,17 +1,26 @@
 \begin{table*}[t]
 \centering
-\caption{Register ablation on low-data CIFAR-100 (100 images/class, ViT-Tiny, 50 epochs). Mean $\pm$ population standard deviation over the three seeds \texttt{42}, \texttt{1337} and \texttt{3407}; best value per column in bold. Test metrics come from a single pass over the untouched 10{,}000-image test split. Validation loss is the value at the selected epoch and is therefore a selected minimum, not an unbiased estimate. The gap $\Delta\mathcal{L}=\mathcal{L}_{\mathrm{val}}-\mathcal{L}_{\mathrm{train}}$ is formed within each seed before averaging. Losses are label-smoothed ($\varepsilon=0.1$) cross-entropy, so they carry a constant positive floor and are comparable across arms but not against unsmoothed values.}
+\caption{Controlled multi-seed ablation across register configurations ($K \in \{0, 1, 4, 8\}$) and data budget regimes (100 vs.\ 300 images/class on CIFAR-100, ViT-Tiny, 50 epochs). Values denote mean $\pm$ population standard deviation across seeds \texttt{42}, \texttt{1337}, and \texttt{3407}, with best performance per column highlighted in bold. Test metrics are evaluated on the untouched 10{,}000-image benchmark. The generalization gap $\Delta\mathcal{L} = \mathcal{L}_{\mathrm{val}} - \mathcal{L}_{\mathrm{train}}$ is computed within each seed before reduction. While tripling data budget raises baseline test accuracy by $+6.14\%$, register tokens provide no statistically significant accuracy or generalization advantage at either scale.}
 \label{tab:main_results}
-\setlength{\tabcolsep}{5pt}
+\setlength{\tabcolsep}{6pt}
 \footnotesize
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Configuration} & \textbf{Test Top-1 (\%)} & \textbf{Test Loss} & \textbf{Val Loss} & \textbf{Gap $\Delta\mathcal{L}$} & \textbf{$\bar{H}^{(12)}$ (bits)} \\
+\textbf{Configuration} & \textbf{Test Top-1 (\%)} & \textbf{Test Loss} & \textbf{Val Loss} & \textbf{Gap $\Delta\mathcal{L}$} & \textbf{$\bar{H}^{(11/12)}$ (bits)} \\
+\midrule
+\multicolumn{6}{l}{\textit{Panel A: Primary Low-Data Benchmark (100 images/class, 9k train / 1k val)}} \\
 \midrule
 Baseline ($K=0$) & \textbf{75.19 $\pm$ 0.24} & \textbf{1.6357 $\pm$ 0.0018} & 1.6829 $\pm$ 0.0609 & 0.8047 $\pm$ 0.0628 & 4.876 $\pm$ 0.115 \\
 Registers ($K=1$) & 74.66 $\pm$ 0.42 & 1.6500 $\pm$ 0.0089 & 1.6545 $\pm$ 0.0380 & 0.7764 $\pm$ 0.0354 & 4.859 $\pm$ 0.101 \\
 Registers ($K=4$) & 75.06 $\pm$ 0.33 & 1.6375 $\pm$ 0.0117 & \textbf{1.6492 $\pm$ 0.0536} & \textbf{0.7680 $\pm$ 0.0514} & \textbf{4.914 $\pm$ 0.031} \\
 Registers ($K=8$) & 74.67 $\pm$ 0.12 & 1.6560 $\pm$ 0.0022 & 1.6602 $\pm$ 0.0268 & 0.7773 $\pm$ 0.0288 & 4.779 $\pm$ 0.091 \\
+\midrule
+\multicolumn{6}{l}{\textit{Panel B: Data Budget Scaling Extension (300 images/class, 27k train / 3k val)}} \\
+\midrule
+Baseline ($K=0$) & \textbf{81.33 $\pm$ 0.37} & 1.4252 $\pm$ 0.0100 & 1.4203 $\pm$ 0.0334 & 0.5396 $\pm$ 0.0353 & \textbf{5.002 $\pm$ 0.057} \\
+Registers ($K=1$) & 81.23 $\pm$ 0.19 & \textbf{1.4211 $\pm$ 0.0035} & \textbf{1.4098 $\pm$ 0.0328} & \textbf{0.5293 $\pm$ 0.0318} & 4.910 $\pm$ 0.048 \\
+Registers ($K=4$) & 81.23 $\pm$ 0.18 & 1.4244 $\pm$ 0.0076 & 1.4167 $\pm$ 0.0301 & 0.5340 $\pm$ 0.0294 & 4.933 $\pm$ 0.039 \\
+Registers ($K=8$) & 81.02 $\pm$ 0.45 & 1.4239 $\pm$ 0.0051 & 1.4125 $\pm$ 0.0225 & 0.5283 $\pm$ 0.0216 & 4.843 $\pm$ 0.082 \\
 \bottomrule
 \end{tabular}
 \end{table*}

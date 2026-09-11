@@ -1,4 +1,4 @@
-# AI Academy — GPU Environment Access (Team 1)
+# AI Academy - GPU Environment Access (Team 1)
 
 > [!CAUTION]
 > **Security Notice:** Sensitive credentials, WireGuard private keys, and Jupyter authentication tokens must never be committed to source control. They are stored securely in your local `.env` file (which is added to `.gitignore`).
@@ -69,7 +69,7 @@ You will land directly in your team's remote JupyterLab environment.
 
 ## 3. Notes & Best Practices
 
-* **Privacy:** Keep your `.env` and `team1.conf` private — they grant direct access to your team's workspace and GPU allocation.
+* **Privacy:** Keep your `.env` and `team1.conf` private - they grant direct access to your team's workspace and GPU allocation.
 * **Connectivity Issues:** If the Jupyter page does not load, verify that your WireGuard tunnel shows active data transmission (transfer bytes increasing and handshake timestamp recent).
 * **Dependencies:** The remote environment ships with standard JupyterLab. Install any project-specific packages directly in your notebook or terminal:
   ```bash

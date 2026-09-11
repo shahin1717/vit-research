@@ -1,4 +1,4 @@
-# 📦 Team Task Package: Gulnisa — Data Engineering & Low-Data Pipeline
+# 📦 Team Task Package: Gulnisa - Data Engineering & Low-Data Pipeline
 
 **Assignee:** Gulnisa  
 **Role:** Lead Data Engineer  

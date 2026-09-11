@@ -13,7 +13,7 @@ tags:
 
 > [!INFO] **Vault & Project Context**  
 > * **Project:** *Do Register Tokens Regularize Vision Transformers Under Data Scarcity?*  
-> * **Course:** DLE-AI-202 (Deep Learning), Cohort I 2026 — Track 1: Pure Research  
+> * **Course:** DLE-AI-202 (Deep Learning), Cohort I 2026 - Track 1: Pure Research  
 > * **Target Deadline:** Mon 7 Sep 2026, 23:59 | Oral Defense: Week of Sep 8, 2026  
 > * **Cross-References:** [Home Base](file:///mnt/c/Vaults/aiac-res/Home%20Base.md) | [me.md](file:///mnt/c/Vaults/me.md) | [roadmap.md](file:///home/shahin/aiac-res/roadmap.md) | [ViT Registers Architecture](file:///mnt/c/Vaults/aiac-res/Atlas/ViT%20Registers%20Architecture.md) | [Effort - ViT Registers Under Data Scarcity](file:///mnt/c/Vaults/aiac-res/Efforts/Effort%20-%20ViT%20Registers%20Under%20Data%20Scarcity.md)
 
@@ -24,7 +24,7 @@ tags:
 This master document synthesizes the complete theoretical research, mathematical foundations, and adversarial self-grilling investigation for our research into **Register Tokens in Vision Transformers under Data Scarcity**.
 
 1. **The Research Core (`/call-research`):** We dissect the softmax attention sink phenomenon, contrast foundational work (Darcet et al., 2023/2024) with competing post-hoc aggregation paradigms (Jiang et al., 2025; Xiao et al., 2024), and establish why compact ViTs ($d=192$) starved of training data ($\sim 10\text{k}$ CIFAR-100 images) present a uniquely unstudied regime where registers may function as **structural regularizers**.
-2. **The Adversarial Self-Grill (`/grill-me`):** We rigorously interrogate every branch of the project decision tree—challenging theoretical assumptions, PyTorch/`timm` register injection mechanics, low-data sampling controls, mathematical metric stability, sweep orchestration, potential failure modes (negative results), and LaTeX/defense deliverables.
+2. **The Adversarial Self-Grill (`/grill-me`):** We rigorously interrogate every branch of the project decision tree, challenging theoretical assumptions, PyTorch/`timm` register injection mechanics, low-data sampling controls, mathematical metric stability, sweep orchestration, potential failure modes (negative results), and LaTeX/defense deliverables.
 3. **The Implementation Blueprint:** We provide production-ready architecture and script specifications to execute the 12-run ablation matrix ($K \in \{0, 1, 4, 8\} \times 3\text{ seeds}$) within the strict $\le 12\text{ GB}$ VRAM and $\sim 2\text{-day}$ compute envelope.
 
 ---
@@ -322,7 +322,7 @@ class AttentionHookManager:
 * **Adversarial Critique:** Running 12 full training runs sequentially might exceed the allocated compute window.
 * **Definitive Answer:**
   * **Batch Size & AMP:** Batch size 64 with PyTorch Automatic Mixed Precision (`torch.cuda.amp.autocast()`).
-  * **Memory Footprint:** ViT-Tiny ($5.7\text{M}$ parameters) at batch size 64 consumes $\sim 2.4\text{ GB}$ VRAM—well under the $12\text{ GB}$ threshold.
+  * **Memory Footprint:** ViT-Tiny ($5.7\text{M}$ parameters) at batch size 64 consumes $\sim 2.4\text{ GB}$ VRAM, well under the $12\text{ GB}$ threshold.
   * **Runtime per Epoch:** 10,000 images / 64 = $\sim 156$ steps/epoch. At $\sim 0.08\text{ s/step}$, 1 epoch takes $\sim 12.5\text{ seconds}$.
   * **50 Epochs:** $\sim 10.4\text{ minutes}$ per experiment.
   * **Full 12-Run Sweep:** $12 \times 10.4\text{ min} = \sim 2.1\text{ hours}$ total wall-clock time! This is less than $5\%$ of our 2-day compute budget, leaving enormous margin for hyperparameter safety and visualization rendering.

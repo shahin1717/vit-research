@@ -2,7 +2,7 @@
 
 > **Project:** *Do Register Tokens Regularize Vision Transformers Under Data Scarcity?*  
 > **Course:** DLE-AI-202 (Deep Learning), Cohort I 2026  
-> **Track:** 1 — Pure Research  
+> **Track:** 1 - Pure Research  
 > **Final Submission Deadline:** **Mon 7 Sep 2026, 23:59**  
 > **Oral Defense:** Week of Sep 8, 2026  
 

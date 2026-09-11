@@ -1,4 +1,4 @@
-# 📦 Team Task Package: Shahin — Core Architecture & Training Engine
+# 📦 Team Task Package: Shahin - Core Architecture & Training Engine
 
 **Assignee:** Shahin  
 **Role:** Core Architecture & Training Engine Lead  

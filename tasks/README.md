@@ -1,7 +1,7 @@
 # 👥 Team Task Packages & Execution Guides
 
 **Project:** *Do Register Tokens Regularize Vision Transformers Under Data Scarcity?*  
-**Course:** DLE-AI-202 (Deep Learning), Cohort I 2026 — Track 1: Pure Research  
+**Course:** DLE-AI-202 (Deep Learning), Cohort I 2026 - Track 1: Pure Research  
 **Submission Deadline:** Monday, 7 September 2026, 23:59 | Oral Defense: Week of Sep 8, 2026  
 **Repository Root:** `/home/shahin/aiac-res/` | **Vault Root:** `C:/Vaults/aiac-res/`  
 

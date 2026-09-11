@@ -1,6 +1,6 @@
 # 🌸 Narmina's Beginner-Friendly Guide: Attention Hooks & Metrics Made Simple
 
-> **Course:** Deep Learning (DLE-AI-202) — Track 1: Pure Research  
+> **Course:** Deep Learning (DLE-AI-202) - Track 1: Pure Research  
 > **Topic:** *Do Register Tokens Regularize Vision Transformers Under Data Scarcity?*  
 > **Assignee:** Narmina (Lead Metrics & Interpretability Engineer)  
 > **Target Files:**
@@ -72,7 +72,7 @@ You are building the **X-Ray machine and medical metrics** to scientifically pro
 
 ---
 
-### 🔹 Task 1: The Camera — `src/models/attention_hook.py`
+### 🔹 Task 1: The Camera - `src/models/attention_hook.py`
 
 #### What does it do?
 PyTorch has a feature called `register_forward_hook`. It lets us attach a "listener" to any internal layer of the model. Every time the model runs an image, our listener grabs the attention matrix and saves it.
@@ -163,7 +163,7 @@ class ViTAttentionHookManager:
 
 ---
 
-### 🔹 Task 2: The Focus Meter — `src/metrics/entropy.py`
+### 🔹 Task 2: The Focus Meter - `src/metrics/entropy.py`
 
 #### What is Shannon Entropy in plain English?
 * **High Entropy ($\sim 7.6$ bits):** The model is looking around smoothly at many patches. Attention is balanced and healthy.
@@ -225,7 +225,7 @@ def compute_layerwise_entropy(attention_dict: Dict[int, torch.Tensor]) -> Dict[i
 
 ---
 
-### 🔹 Task 3: The Spike Counter — `src/metrics/outliers.py`
+### 🔹 Task 3: The Spike Counter - `src/metrics/outliers.py`
 
 #### What is an Outlier in plain English?
 In ViT without registers, background patch activations blow up into huge numbers.
@@ -295,7 +295,7 @@ def compute_patch_outlier_rate(
 
 ---
 
-### 🔹 Task 4: Generalization Gap — `src/metrics/generalization.py`
+### 🔹 Task 4: Generalization Gap - `src/metrics/generalization.py`
 
 #### What is Generalization Gap in plain English?
 It measures how much the model is overfitting:
@@ -344,7 +344,7 @@ def compute_accuracy_gap(train_acc: float, val_acc: float) -> float:
 
 ---
 
-### 🔹 Task 5: The Package Initializer — `src/metrics/__init__.py`
+### 🔹 Task 5: The Package Initializer - `src/metrics/__init__.py`
 
 #### 📝 Code for `src/metrics/__init__.py`:
 ```python

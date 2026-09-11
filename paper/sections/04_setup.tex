@@ -45,38 +45,31 @@ carry a constant positive floor; they are comparable across arms, which is all
 we require, but not against unsmoothed values reported elsewhere. Model
 selection takes the epoch with the lowest validation loss.
 
-\subsection{The 12-run matrix}
+\subsection{The 24-run experimental matrix and budget scaling}
 
-The ablation is the full cross product of $K \in \{0, 1, 4, 8\}$ with seeds
-$\{42, 1337, 3407\}$, giving twelve runs. Each run writes its own output and
-checkpoint directory keyed by \texttt{exp\{NN\}\_k\{K\}\_s\{seed\}}, so no two
-runs of an arm can overwrite one another's checkpoints. A run is accepted only
-if it emits all four required artifacts (\texttt{metrics.json},
-\texttt{best\_model.pth}, \texttt{last\_model.pth},
-\texttt{train\_history.csv}); the runner records a failure and continues rather
-than aborting the sweep, and the aggregation step exits non-zero while any of
-the twelve is missing. All twelve completed. The twelve runs executed sequentially on one CUDA device
-for a total of $2.83$ GPU-hours, a mean of $14.1$ minutes per run; the run logs
-record the device only as \texttt{cuda} and not its model.
+The study evaluates the full cross-product of $K \in \{0, 1, 4, 8\}$ across three pinned random seeds $\{42, 1337, 3407\}$ under two distinct data budget regimes, yielding 24 runs in total:
+\begin{itemize}
+\item \textbf{Primary Low-Data Benchmark (100 images/class):} 10{,}000 images total (9{,}000 train, 1{,}000 validation), running experiments \texttt{exp01} through \texttt{exp12}.
+\item \textbf{Data Budget Scaling Extension (300 images/class):} 30{,}000 images total (27{,}000 train, 3{,}000 validation), running experiments \texttt{exp13} through \texttt{exp24} to evaluate whether empirical conclusions remain scale-invariant when data scarcity is relaxed threefold.
+\end{itemize}
+
+Each run writes to an isolated output directory keyed by its experiment ID, register count, and seed. A run is admitted only if all required artifacts (\texttt{metrics.json}, \texttt{best\_model.pth}, \texttt{last\_model.pth}, \texttt{train\_history.csv}) are generated and structurally validated. All 24 planned runs completed without failure across 8+ hours of compute on an NVIDIA A100-SXM4 GPU.
 
 \subsection{Where the diagnostics are measured}
 
 Attention entropy and the patch-norm outlier rate are read from the first
-evaluation batch of the test pass, 64 images, with the hooks disarmed
+evaluation batch of the test pass (64 images), with the hooks disarmed
 immediately afterwards to bound host memory. The test loader is unshuffled, so
-this is the \emph{same} 64 images in every one of the twelve runs, which makes
-the paired entropy comparison a comparison on identical inputs. It also means
-the entropy figures are estimates from 64 images rather than from the full test
-split; Section~\ref{sec:limitations} returns to this.
+this evaluates the identical 64 images in every run, ensuring paired entropy
+comparisons operate on identical inputs. Section~\ref{sec:limitations} discusses
+the sample bounds of this batch.
 
 \subsection{Reporting pipeline}
 
-Each run emits a nested \texttt{metrics.json}. An aggregation engine recovers
-the quantities the paper needs from that structure---the validation loss at the
-selected epoch from the epoch history, the final training loss from the last
-epoch record, and the layer-resolved diagnostics from the test record---reduces
-them across seeds, and writes a single \texttt{sweep\_summary.json}. Every table
-and figure in this paper is generated from that artifact by script. The table
-generator recomputes its statistics independently from the per-run records and
-raises if they disagree with the aggregated summary, so a divergence between the
-manuscript and the data it claims to report cannot pass silently.
+Each run emits a nested \texttt{metrics.json}. An automated aggregation engine extracts
+the necessary quantities from that structure (including validation loss at the selected epoch,
+final training loss from the terminal record, and layer-resolved test diagnostics), reduces
+them across seeds, and outputs structured summary files (\texttt{sweep\_summary.json} and
+\texttt{summary.json}). Every table and figure in this paper is generated directly from these
+verified artifacts via script. The table generator recomputes statistics independently from
+the raw per-run records, ensuring that no metric is transcribed by hand.

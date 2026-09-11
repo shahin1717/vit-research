@@ -1,15 +1,15 @@
-# 📦 Team Task Package: Rufet — Results Engine & Statistical Analysis Lead
+# 📦 Team Task Package: Rufet - Results Engine & Statistical Analysis Lead
 
 **Assignee:** Rufet
 **Role:** Statistical Inference Layer, Attention Extraction & Evidence Generation
 **Target Code Files:**
-* `src/utils/logger.py` — multi-seed statistical reduction engine
-* `src/utils/__init__.py` — package exports
-* `tests/test_sweep_aggregation.py` — reduction-engine test suite
-* `scripts/visualize_attention.py` — attention tensor extraction & spatial reconstruction
-* `scripts/plot_metrics.py` — quantitative evidence figures
-* `src/utils/export_latex.py` — automated results-table generator
-* `.gitattributes` — repository line-ending policy
+* `src/utils/logger.py` - multi-seed statistical reduction engine
+* `src/utils/__init__.py` - package exports
+* `tests/test_sweep_aggregation.py` - reduction-engine test suite
+* `scripts/visualize_attention.py` - attention tensor extraction & spatial reconstruction
+* `scripts/plot_metrics.py` - quantitative evidence figures
+* `src/utils/export_latex.py` - automated results-table generator
+* `.gitattributes` - repository line-ending policy
 
 **Target Delivery:** Friday, 4 September 2026
 **Cross-References:** [Team Task Division](../team_task_division.md) | [Sweep Execution Package](emil_sweep_execution_and_operations.md) | [Roadmap](../roadmap.md)
@@ -27,13 +27,13 @@ Three hypotheses from the proposal must be decided by code you write:
 
 | Hypothesis | Decided by |
 | :--- | :--- |
-| **H1 — Structural regularization**: registers shrink $\Delta\mathcal{L} = \mathcal{L}_{\text{val}} - \mathcal{L}_{\text{train}}$ | Per-seed gap reduction in the aggregation engine |
-| **H2 — Capacity dilution**: at $d=192$, large $K$ dilutes representation power | Non-monotonic accuracy across $K \in \{0,1,4,8\}$ with $\sigma$ across seeds |
-| **H3 — Entropy collapse prevention**: registers stop layer-wise attention entropy collapse | Layer-resolved $\bar{H}^{(l)}$ with $\pm 1\sigma$ bands, plus the attention overlays |
+| **H1 - Structural regularization**: registers shrink $\Delta\mathcal{L} = \mathcal{L}_{\text{val}} - \mathcal{L}_{\text{train}}$ | Per-seed gap reduction in the aggregation engine |
+| **H2 - Capacity dilution**: at $d=192$, large $K$ dilutes representation power | Non-monotonic accuracy across $K \in \{0,1,4,8\}$ with $\sigma$ across seeds |
+| **H3 - Entropy collapse prevention**: registers stop layer-wise attention entropy collapse | Layer-resolved $\bar{H}^{(l)}$ with $\pm 1\sigma$ bands, plus the attention overlays |
 
 **Interface with the execution side:** the sweep package (Emil) owns everything up
 to and including the per-run artifacts. This package owns everything downstream.
-`outputs/sweep_summary.json` is the single boundary object — once it exists, no
+`outputs/sweep_summary.json` is the single boundary object - once it exists, no
 figure, table or manuscript claim may read a raw run directory again.
 
 ---
@@ -60,7 +60,7 @@ table needs are not top-level keys:
 | `final_train_loss` | `history[-1]["train_loss"]` |
 | `mean_layerwise_entropy` | mean over `test_results["layerwise_entropy"].values()` |
 
-A reader written as `data.get("best_val_loss", 0.0)` therefore returns `0.0` — and
+A reader written as `data.get("best_val_loss", 0.0)` therefore returns `0.0` - and
 does so **silently**, filling validation loss, generalization gap and entropy with
 zeros. That is three of the four columns of the main results table, and nothing
 raises. The engine must prefer a flat key when present and otherwise reconstruct
@@ -104,8 +104,8 @@ stated with a confidence claim.
 ### 3.4 Output schema
 
 `outputs/sweep_summary.json`, keyed `k_0`, `k_1`, `k_4`, `k_8`. Each arm carries at
-minimum the seven fields the table generator reads — `val_top1_mean/std`,
-`val_loss_mean/std`, `entropy_mean/std`, `gen_gap_mean` — plus `gen_gap_std`, the
+minimum the seven fields the table generator reads - `val_top1_mean/std`,
+`val_loss_mean/std`, `entropy_mean/std`, `gen_gap_mean` - plus `gen_gap_std`, the
 per-layer aggregates, and a `meta` block recording which of the twelve runs were
 found and which are missing.
 
@@ -116,7 +116,7 @@ found and which are missing.
   than raising, so figures can be drafted mid-sweep.
 * A missing or malformed `metrics.json` skips that run instead of aborting.
 * CLI `python src/utils/logger.py --output_dir outputs/`, with `--strict` exiting
-  non-zero while any of the twelve runs is absent — this is what makes a merge of
+  non-zero while any of the twelve runs is absent - this is what makes a merge of
   parallel Kaggle slices verifiable rather than assumed.
 
 ---
@@ -130,7 +130,7 @@ right, because an off-by-$K$ slice silently produces a plausible but wrong pictu
    (read from the checkpoint, not assumed).
 2. **Capture** with `ViTAttentionHookManager`. Modern timm runs fused
    scaled-dot-product attention, so the $[B, H, S, S]$ matrix is never materialised
-   — the hook reconstructs the softmax weights from the Q/K projections.
+   - the hook reconstructs the softmax weights from the Q/K projections.
 3. **Slice** the `[CLS]` query row against spatial keys only:
    $A^{(l)}_{\text{cls},\,1+K:} \in \mathbb{R}^{196}$. Index 0 is `[CLS]`, indices
    $1 \dots K$ are registers; the slice must start at $1+K$ or the register columns
@@ -153,7 +153,7 @@ comparison is not a comparison.
 | **F2** | Layer $1 \dots 12$ versus $\bar{H}^{(l)}$ (bits), four curves, $\pm 1\sigma$ bands | H3 |
 | **F3** | $K$ versus $\Delta\mathcal{L}$ with error bars from `gen_gap_std` | H1 |
 | **F4** | Train/validation loss curves, mean across seeds per arm, from `train_history.csv` | H1 |
-| **F5** | $K$ versus Top-1 accuracy with $\sigma$ — the direct dilution test | H2 |
+| **F5** | $K$ versus Top-1 accuracy with $\sigma$ - the direct dilution test | H2 |
 
 All exports are vector PDF into `paper/figures/`.
 
@@ -163,7 +163,7 @@ All exports are vector PDF into `paper/figures/`.
 
 Reads `outputs/sweep_summary.json`, writes `paper/tables/results_table.tex` with
 one row per arm: configuration, Top-1 accuracy, validation loss, generalization
-gap, layer-12 entropy — each rendered `mean $\pm$ std`. Every number in the
+gap, layer-12 entropy - each rendered `mean $\pm$ std`. Every number in the
 manuscript's main table originates here; none is typed by hand, so re-running the
 sweep regenerates the paper's numbers without manual transcription.
 

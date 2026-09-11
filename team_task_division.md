@@ -11,7 +11,7 @@ tags:
 
 > [!INFO] **Project Context**  
 > * **Project:** *Do Register Tokens Regularize Vision Transformers Under Data Scarcity?*  
-> * **Course:** DLE-AI-202 (Deep Learning), Cohort I 2026 — Track 1: Pure Research  
+> * **Course:** DLE-AI-202 (Deep Learning), Cohort I 2026 - Track 1: Pure Research  
 > * **Submission Deadline:** **Mon 7 Sep 2026, 23:59** | Oral Defense: Week of Sep 8, 2026  
 > * **Compute Envelope:** ~2 days GPU window, $\le 12\text{ GB}$ peak VRAM, Automatic Mixed Precision (AMP)  
 > * **Codebase Workspace:** `/home/shahin/aiac-res/` | **Vault Root:** `C:/Vaults/aiac-res/`  
@@ -43,7 +43,7 @@ graph TD
 
 ---
 
-### 1️⃣ Gulnisa — Data Engineering & Multi-Budget Pipeline
+### 1️⃣ Gulnisa - Data Engineering & Multi-Budget Pipeline
 
 * **Role:** Lead Data Engineer  
 * **Target Files:**
@@ -81,7 +81,7 @@ graph TD
 
 ---
 
-### 2️⃣ Narmina — Diagnostic Metrics Suite & Attention Hooks
+### 2️⃣ Narmina - Diagnostic Metrics Suite & Attention Hooks
 
 * **Role:** Lead Metrics & Interpretability Engineer  
 * **Target Files:**
@@ -117,7 +117,7 @@ graph TD
 
 ---
 
-### 3️⃣ Shahin — Core Architecture & Training Engine
+### 3️⃣ Shahin - Core Architecture & Training Engine
 
 * **Role:** Core Architecture & Integration Lead  
 * **Target Files:**
@@ -150,7 +150,7 @@ graph TD
 
 ---
 
-### 4️⃣ Emil — Ablation Sweeps, Runner Automation & Cluster Execution
+### 4️⃣ Emil - Ablation Sweeps, Runner Automation & Cluster Execution
 
 * **Role:** Automation & Experiment Operations Lead  
 * **Target Files:**
@@ -177,7 +177,7 @@ graph TD
 
 ---
 
-### 5️⃣ Rufet — Ablation Analytics, Visualizations & LaTeX Paper Integration
+### 5️⃣ Rufet - Ablation Analytics, Visualizations & LaTeX Paper Integration
 
 * **Role:** Lead Analyst & Academic Paper / Deck Author  
 * **Target Files:**

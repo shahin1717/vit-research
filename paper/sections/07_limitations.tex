@@ -5,16 +5,12 @@ We state the limits of this study plainly, because a negative result is only
 useful if the reader can judge how far it generalises.
 
 \textbf{Three seeds.} Every $p$-value here has $\mathrm{df} = 2$. The tests can
-detect only large, perfectly consistent effects, and the fifteen comparisons in
+detect only large, perfectly consistent effects, and the comparisons in
 Table~\ref{tab:paired_effects} are uncorrected. We rely on the direction count
 as the primary signal for this reason, and we do not claim that any effect we
-failed to detect is absent---only that it is smaller than this design can see.
+failed to detect is absent, only that it is smaller than this design can see.
 
-\textbf{One architecture, one dataset, one budget.} The result is established
-for ViT-Tiny at $d = 192$, on a 100-image-per-class CIFAR-100 subset, for 50
-epochs from ImageNet-pretrained weights. It says nothing about ViT-Small or
-larger, about datasets whose statistics differ from CIFAR-100, or about longer
-schedules.
+\textbf{Architecture and dataset scope.} While we verified scale invariance across both 100 and 300 images per class (10{,}000 and 30{,}000 training examples), the result is established exclusively for ViT-Tiny at $d = 192$ on CIFAR-100 subsets for 50 epochs from ImageNet-pretrained weights. It does not generalize to ViT-Small or larger backbones, to datasets whose spatial statistics differ markedly from CIFAR-100, or to longer training schedules.
 
 \textbf{Pretrained initialisation.} This is the most consequential limitation.
 Registers were introduced as a pretraining-time intervention and we apply them
@@ -23,7 +19,7 @@ registers, not the mechanism itself. A from-scratch replication at this scale
 would test the original claim more directly and is the obvious next experiment.
 
 \textbf{Diagnostics from 64 images.} Entropy and outlier rates are computed on
-the first test batch only. The batch is identical across all twelve runs, so the
+the first test batch only. The batch is identical across all runs, so the
 paired comparison is sound, but the absolute values are estimates from 64
 images and their standard deviations reflect seed variation rather than sampling
 variation over the test set. A full-split diagnostic pass would tighten
@@ -40,6 +36,7 @@ a scalar diagnostic.
 
 \textbf{Validation-based selection.} Checkpoints are chosen on the same
 1{,}000-image split whose loss we then report. We treat this as a finding rather
-than only a flaw---it is what produces the dissociation of
-Section~\ref{sec:discussion}---but it does mean our validation numbers are
+than only a flaw (indeed, it produces the dissociation analyzed in
+Section~\ref{sec:discussion}), but it does mean our validation numbers are
 selected extrema and should not be read as unbiased estimates.
+
