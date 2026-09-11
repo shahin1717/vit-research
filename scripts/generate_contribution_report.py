@@ -248,31 +248,31 @@ def create_contribution_report(output_pdf_path: str):
     story.append(Paragraph("3. Detailed Technical Contributions per Member", h1_style))
 
     story.append(Paragraph(
-        "&bull; <b>Shahin Alakparov (20.0%):</b> Engineered <code>RegisterVisionTransformer</code> wrapping <code>timm</code> ViT-Tiny (d=192). "
+        "&bull; <b>Shahin Alakparov:</b> Engineered <code>RegisterVisionTransformer</code> wrapping <code>timm</code> ViT-Tiny (d=192). "
         "Implemented prepend logic for learnable registers R &isin; &real;<sup>K &times; d</sup> and output slicing. Developed the AMP training harness in "
         "<code>scripts/train.py</code> (AdamW, linear warmup + cosine annealing, gradient clipping, checkpoint serialization) and verified 59/59 tests.",
         bullet_style,
     ))
     story.append(Paragraph(
-        "&bull; <b>Gulnisa Abdurahmanli (20.0%):</b> Built generalized <code>StratifiedCIFAR100Subset</code> in <code>src/data/cifar100_subset.py</code>, sampling both "
+        "&bull; <b>Gulnisa Abdurahmanli:</b> Built generalized <code>StratifiedCIFAR100Subset</code> in <code>src/data/cifar100_subset.py</code>, sampling both "
         "100 and 300 samples/class (10k and 30k images) with deterministic generator seeds. Implemented balanced 9k/1k and 27k/3k train/val splits, Bicubic "
         "RandomResizedCrop(224), AutoAugment, and standard test set evaluation loader with pinned memory and multi-worker prefetching.",
         bullet_style,
     ))
     story.append(Paragraph(
-        "&bull; <b>Narmina Ibrahimova (20.0%):</b> Authored <code>ViTAttentionHookManager</code> in <code>src/models/attention_hook.py</code>, non-invasively "
+        "&bull; <b>Narmina Ibrahimova:</b> Authored <code>ViTAttentionHookManager</code> in <code>src/models/attention_hook.py</code>, non-invasively "
         "intercepting attention weights across all 12 MHSA layers with automatic CUDA memory clearing. Coded Shannon attention entropy H(A<sup>(l)</sup>) in "
         "<code>src/metrics/entropy.py</code>, patch-norm 3&sigma; outlier rate in <code>src/metrics/outliers.py</code>, and generalization gap metrics.",
         bullet_style,
     ))
     story.append(Paragraph(
-        "&bull; <b>Emil Ahmedli (20.0%):</b> Led execution of all 24 ablation sweep runs across both data budgets (12 &times; 100pc and 12 &times; 300pc). "
+        "&bull; <b>Emil Ahmedli:</b> Led execution of all 24 ablation sweep runs across both data budgets (12 &times; 100pc and 12 &times; 300pc). "
         "Configured WireGuard VPN (<code>team1.conf</code>) and remote NVIDIA A100-SXM4 GPU cluster environment. Authored automated execution runners "
         "<code>scripts/run_sweep.sh</code> and <code>scripts/run_databudget_sweep.sh</code> with GPU cache clearing, supervising zero-OOM execution across 8+ hours.",
         bullet_style,
     ))
     story.append(Paragraph(
-        "&bull; <b>Rufet Dosteliyev (20.0%):</b> Led multi-seed ablation analytics, statistical reduction, and scientific reporting across both 100pc and 300pc "
+        "&bull; <b>Rufet Dosteliyev:</b> Led multi-seed ablation analytics, statistical reduction, and scientific reporting across both 100pc and 300pc "
         "experimental suites. Built aggregation engines (<code>src/utils/logger.py</code> and <code>src/utils/aggregate_databudget.py</code>) producing "
         "<code>sweep_summary.json</code> and <code>summary.json</code>. Authored comparative visualizers (<code>scripts/plot_metrics.py</code>, "
         "<code>scripts/plot_databudget_comparison.py</code>), LaTeX tables, and manuscript Section 5.",
