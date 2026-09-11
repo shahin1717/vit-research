@@ -1,0 +1,83 @@
+2026-09-07 09:53:25 [INFO] train - Loading config file: configs/vit_tiny_k4.yaml
+2026-09-07 09:53:25 [INFO] train - Deterministic seed set to 3407.
+2026-09-07 09:53:25 [INFO] train - === Starting Experiment: rViT_K4_seed3407 ===
+2026-09-07 09:53:25 [INFO] train - Device: cuda | AMP: True | Registers K=4 | Seed: 3407
+2026-09-07 09:53:27 [INFO] train - Dataloaders ready. Train batches: 141, Val batches: 16
+2026-09-07 09:53:28 [INFO] timm.models._builder - Loading pretrained weights from Hugging Face hub (timm/vit_tiny_patch16_224.augreg_in21k_ft_in1k)
+2026-09-07 09:53:28 [INFO] httpx - HTTP Request: HEAD https://huggingface.co/timm/vit_tiny_patch16_224.augreg_in21k_ft_in1k/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-09-07 09:53:28 [WARNING] huggingface_hub.utils._http - Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-09-07 09:53:28 [INFO] timm.models._hub - [timm/vit_tiny_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+2026-09-07 09:53:28 [INFO] timm.models._builder - Missing keys (head.weight, head.bias) discovered while loading pretrained weights. This is expected if model is being adapted.
+2026-09-07 09:53:28 [INFO] src.models.register_vit - Initialized 4 register tokens of dimension 192 with trunc_normal_(std=0.02).
+2026-09-07 09:53:28 [INFO] train - Model built. Total Parameters: 5544484 (Trainable: 5544484)
+2026-09-07 09:53:43 [INFO] train - Epoch [01/50] (14.8s) | Train Loss: 3.7213, Acc: 19.79% | Val Loss: 2.3927, Acc: 50.30% | Gap: -1.3287 | LR: 0.000100
+2026-09-07 09:53:44 [INFO] train - Saved new best model checkpoint (Val Acc: 50.30%) at epoch 1.
+2026-09-07 09:53:59 [INFO] train - Epoch [02/50] (14.2s) | Train Loss: 2.3408, Acc: 52.39% | Val Loss: 1.9008, Acc: 64.20% | Gap: -0.4400 | LR: 0.000200
+2026-09-07 09:54:01 [INFO] train - Saved new best model checkpoint (Val Acc: 64.20%) at epoch 2.
+2026-09-07 09:54:17 [INFO] train - Epoch [03/50] (14.0s) | Train Loss: 2.1077, Acc: 59.28% | Val Loss: 1.8262, Acc: 67.70% | Gap: -0.2814 | LR: 0.000300
+2026-09-07 09:54:20 [INFO] train - Saved new best model checkpoint (Val Acc: 67.70%) at epoch 3.
+2026-09-07 09:54:36 [INFO] train - Epoch [04/50] (14.0s) | Train Loss: 2.0958, Acc: 59.52% | Val Loss: 1.9048, Acc: 63.80% | Gap: -0.1911 | LR: 0.000400
+/nvme0n1-disk/venvs/jupyter_team1/lib/python3.12/site-packages/torch/optim/lr_scheduler.py:243: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
+  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
+2026-09-07 09:54:53 [INFO] train - Epoch [05/50] (14.4s) | Train Loss: 2.0952, Acc: 59.14% | Val Loss: 2.0157, Acc: 61.80% | Gap: -0.0795 | LR: 0.000500
+2026-09-07 09:55:09 [INFO] train - Epoch [06/50] (13.7s) | Train Loss: 1.9925, Acc: 62.43% | Val Loss: 1.9772, Acc: 62.20% | Gap: -0.0154 | LR: 0.000500
+2026-09-07 09:55:25 [INFO] train - Epoch [07/50] (13.7s) | Train Loss: 1.9277, Acc: 64.61% | Val Loss: 2.0442, Acc: 59.50% | Gap: 0.1165 | LR: 0.000499
+2026-09-07 09:55:41 [INFO] train - Epoch [08/50] (13.9s) | Train Loss: 1.8331, Acc: 67.46% | Val Loss: 1.8902, Acc: 64.80% | Gap: 0.0571 | LR: 0.000498
+2026-09-07 09:55:58 [INFO] train - Epoch [09/50] (14.1s) | Train Loss: 1.7670, Acc: 69.08% | Val Loss: 1.9369, Acc: 63.30% | Gap: 0.1698 | LR: 0.000495
+2026-09-07 09:56:14 [INFO] train - Epoch [10/50] (14.0s) | Train Loss: 1.6747, Acc: 72.58% | Val Loss: 1.8981, Acc: 65.80% | Gap: 0.2234 | LR: 0.000491
+2026-09-07 09:56:30 [INFO] train - Epoch [11/50] (14.1s) | Train Loss: 1.6387, Acc: 73.24% | Val Loss: 1.9159, Acc: 64.80% | Gap: 0.2771 | LR: 0.000485
+2026-09-07 09:56:47 [INFO] train - Epoch [12/50] (14.0s) | Train Loss: 1.5845, Acc: 75.24% | Val Loss: 1.8710, Acc: 66.10% | Gap: 0.2865 | LR: 0.000479
+2026-09-07 09:57:03 [INFO] train - Epoch [13/50] (13.8s) | Train Loss: 1.5510, Acc: 76.60% | Val Loss: 1.8698, Acc: 65.60% | Gap: 0.3187 | LR: 0.000471
+2026-09-07 09:57:19 [INFO] train - Epoch [14/50] (13.6s) | Train Loss: 1.5014, Acc: 78.59% | Val Loss: 1.9607, Acc: 63.30% | Gap: 0.4593 | LR: 0.000463
+2026-09-07 09:57:35 [INFO] train - Epoch [15/50] (13.8s) | Train Loss: 1.4707, Acc: 78.99% | Val Loss: 1.9450, Acc: 65.50% | Gap: 0.4743 | LR: 0.000453
+2026-09-07 09:57:51 [INFO] train - Epoch [16/50] (13.8s) | Train Loss: 1.4247, Acc: 81.10% | Val Loss: 1.8885, Acc: 67.90% | Gap: 0.4639 | LR: 0.000443
+2026-09-07 09:57:53 [INFO] train - Saved new best model checkpoint (Val Acc: 67.90%) at epoch 16.
+2026-09-07 09:58:09 [INFO] train - Epoch [17/50] (14.0s) | Train Loss: 1.3613, Acc: 83.46% | Val Loss: 1.8891, Acc: 67.30% | Gap: 0.5278 | LR: 0.000431
+2026-09-07 09:58:25 [INFO] train - Epoch [18/50] (13.5s) | Train Loss: 1.3531, Acc: 83.52% | Val Loss: 1.9202, Acc: 67.00% | Gap: 0.5671 | LR: 0.000419
+2026-09-07 09:58:41 [INFO] train - Epoch [19/50] (14.0s) | Train Loss: 1.3080, Acc: 84.70% | Val Loss: 1.8642, Acc: 67.80% | Gap: 0.5562 | LR: 0.000406
+2026-09-07 09:58:57 [INFO] train - Epoch [20/50] (13.9s) | Train Loss: 1.2913, Acc: 85.29% | Val Loss: 1.8742, Acc: 67.40% | Gap: 0.5829 | LR: 0.000392
+2026-09-07 09:59:13 [INFO] train - Epoch [21/50] (14.0s) | Train Loss: 1.2477, Acc: 86.72% | Val Loss: 1.8861, Acc: 66.80% | Gap: 0.6384 | LR: 0.000378
+2026-09-07 09:59:29 [INFO] train - Epoch [22/50] (13.9s) | Train Loss: 1.2321, Acc: 87.31% | Val Loss: 1.8352, Acc: 68.60% | Gap: 0.6031 | LR: 0.000362
+2026-09-07 09:59:31 [INFO] train - Saved new best model checkpoint (Val Acc: 68.60%) at epoch 22.
+2026-09-07 09:59:47 [INFO] train - Epoch [23/50] (14.0s) | Train Loss: 1.2054, Acc: 88.31% | Val Loss: 1.8978, Acc: 65.90% | Gap: 0.6924 | LR: 0.000347
+2026-09-07 10:00:04 [INFO] train - Epoch [24/50] (14.2s) | Train Loss: 1.1759, Acc: 89.19% | Val Loss: 1.8503, Acc: 68.30% | Gap: 0.6744 | LR: 0.000331
+2026-09-07 10:00:20 [INFO] train - Epoch [25/50] (14.1s) | Train Loss: 1.1583, Acc: 89.79% | Val Loss: 1.8717, Acc: 67.10% | Gap: 0.7134 | LR: 0.000314
+2026-09-07 10:00:36 [INFO] train - Epoch [26/50] (14.0s) | Train Loss: 1.1268, Acc: 90.92% | Val Loss: 1.8861, Acc: 67.60% | Gap: 0.7592 | LR: 0.000298
+2026-09-07 10:00:52 [INFO] train - Epoch [27/50] (13.8s) | Train Loss: 1.1200, Acc: 90.89% | Val Loss: 1.8359, Acc: 69.50% | Gap: 0.7159 | LR: 0.000281
+2026-09-07 10:00:54 [INFO] train - Saved new best model checkpoint (Val Acc: 69.50%) at epoch 27.
+2026-09-07 10:01:11 [INFO] train - Epoch [28/50] (13.9s) | Train Loss: 1.0874, Acc: 92.02% | Val Loss: 1.8413, Acc: 68.70% | Gap: 0.7539 | LR: 0.000264
+2026-09-07 10:01:27 [INFO] train - Epoch [29/50] (13.9s) | Train Loss: 1.0844, Acc: 92.18% | Val Loss: 1.8137, Acc: 69.40% | Gap: 0.7292 | LR: 0.000246
+2026-09-07 10:01:43 [INFO] train - Epoch [30/50] (14.0s) | Train Loss: 1.0627, Acc: 92.47% | Val Loss: 1.8070, Acc: 69.60% | Gap: 0.7443 | LR: 0.000229
+2026-09-07 10:01:45 [INFO] train - Saved new best model checkpoint (Val Acc: 69.60%) at epoch 30.
+2026-09-07 10:02:02 [INFO] train - Epoch [31/50] (14.2s) | Train Loss: 1.0404, Acc: 93.08% | Val Loss: 1.7863, Acc: 71.20% | Gap: 0.7459 | LR: 0.000212
+2026-09-07 10:02:04 [INFO] train - Saved new best model checkpoint (Val Acc: 71.20%) at epoch 31.
+2026-09-07 10:02:20 [INFO] train - Epoch [32/50] (13.9s) | Train Loss: 1.0291, Acc: 93.51% | Val Loss: 1.8113, Acc: 70.50% | Gap: 0.7822 | LR: 0.000196
+2026-09-07 10:02:36 [INFO] train - Epoch [33/50] (13.8s) | Train Loss: 1.0006, Acc: 94.53% | Val Loss: 1.7940, Acc: 70.20% | Gap: 0.7934 | LR: 0.000179
+2026-09-07 10:02:52 [INFO] train - Epoch [34/50] (13.7s) | Train Loss: 0.9794, Acc: 95.06% | Val Loss: 1.7686, Acc: 70.90% | Gap: 0.7892 | LR: 0.000163
+2026-09-07 10:03:09 [INFO] train - Epoch [35/50] (13.8s) | Train Loss: 0.9810, Acc: 94.82% | Val Loss: 1.7881, Acc: 71.00% | Gap: 0.8071 | LR: 0.000148
+2026-09-07 10:03:25 [INFO] train - Epoch [36/50] (14.1s) | Train Loss: 0.9668, Acc: 95.39% | Val Loss: 1.7235, Acc: 72.30% | Gap: 0.7567 | LR: 0.000133
+2026-09-07 10:03:28 [INFO] train - Saved new best model checkpoint (Val Acc: 72.30%) at epoch 36.
+2026-09-07 10:03:44 [INFO] train - Epoch [37/50] (14.0s) | Train Loss: 0.9562, Acc: 95.60% | Val Loss: 1.7269, Acc: 72.70% | Gap: 0.7708 | LR: 0.000118
+2026-09-07 10:03:46 [INFO] train - Saved new best model checkpoint (Val Acc: 72.70%) at epoch 37.
+2026-09-07 10:04:03 [INFO] train - Epoch [38/50] (14.0s) | Train Loss: 0.9430, Acc: 95.96% | Val Loss: 1.7723, Acc: 71.70% | Gap: 0.8294 | LR: 0.000104
+2026-09-07 10:04:19 [INFO] train - Epoch [39/50] (14.2s) | Train Loss: 0.9406, Acc: 96.02% | Val Loss: 1.7117, Acc: 72.20% | Gap: 0.7711 | LR: 0.000091
+2026-09-07 10:04:35 [INFO] train - Epoch [40/50] (13.8s) | Train Loss: 0.9155, Acc: 96.73% | Val Loss: 1.7041, Acc: 74.00% | Gap: 0.7886 | LR: 0.000079
+2026-09-07 10:04:37 [INFO] train - Saved new best model checkpoint (Val Acc: 74.00%) at epoch 40.
+2026-09-07 10:04:53 [INFO] train - Epoch [41/50] (13.5s) | Train Loss: 0.9225, Acc: 96.51% | Val Loss: 1.6817, Acc: 73.90% | Gap: 0.7592 | LR: 0.000067
+2026-09-07 10:05:09 [INFO] train - Epoch [42/50] (13.8s) | Train Loss: 0.9042, Acc: 96.98% | Val Loss: 1.6889, Acc: 73.40% | Gap: 0.7848 | LR: 0.000057
+2026-09-07 10:05:26 [INFO] train - Epoch [43/50] (13.9s) | Train Loss: 0.8987, Acc: 97.30% | Val Loss: 1.6858, Acc: 73.90% | Gap: 0.7871 | LR: 0.000047
+2026-09-07 10:05:41 [INFO] train - Epoch [44/50] (13.8s) | Train Loss: 0.8971, Acc: 97.16% | Val Loss: 1.6771, Acc: 74.70% | Gap: 0.7800 | LR: 0.000039
+2026-09-07 10:05:44 [INFO] train - Saved new best model checkpoint (Val Acc: 74.70%) at epoch 44.
+2026-09-07 10:06:00 [INFO] train - Epoch [45/50] (14.3s) | Train Loss: 0.8909, Acc: 97.29% | Val Loss: 1.6597, Acc: 75.00% | Gap: 0.7688 | LR: 0.000031
+2026-09-07 10:06:02 [INFO] train - Saved new best model checkpoint (Val Acc: 75.00%) at epoch 45.
+2026-09-07 10:06:18 [INFO] train - Epoch [46/50] (13.9s) | Train Loss: 0.8831, Acc: 97.50% | Val Loss: 1.6495, Acc: 74.80% | Gap: 0.7663 | LR: 0.000025
+2026-09-07 10:06:35 [INFO] train - Epoch [47/50] (14.0s) | Train Loss: 0.8849, Acc: 97.51% | Val Loss: 1.6402, Acc: 75.00% | Gap: 0.7554 | LR: 0.000019
+2026-09-07 10:06:50 [INFO] train - Epoch [48/50] (13.7s) | Train Loss: 0.8938, Acc: 97.22% | Val Loss: 1.6350, Acc: 74.60% | Gap: 0.7412 | LR: 0.000015
+2026-09-07 10:07:07 [INFO] train - Epoch [49/50] (14.2s) | Train Loss: 0.8728, Acc: 97.82% | Val Loss: 1.6318, Acc: 75.60% | Gap: 0.7590 | LR: 0.000012
+2026-09-07 10:07:09 [INFO] train - Saved new best model checkpoint (Val Acc: 75.60%) at epoch 49.
+2026-09-07 10:07:25 [INFO] train - Epoch [50/50] (14.0s) | Train Loss: 0.8859, Acc: 97.47% | Val Loss: 1.6369, Acc: 74.90% | Gap: 0.7510 | LR: 0.000011
+2026-09-07 10:07:27 [INFO] train - Training complete in 13.98 minutes. Best Val Acc: 75.60% at epoch 49.
+2026-09-07 10:07:27 [INFO] train - Loaded best model from epoch 49 for final test set evaluation.
+2026-09-07 10:07:37 [INFO] train - === Final Test Results === Top-1: 74.64% | Top-5: 92.21% | Test Loss: 1.6538
+2026-09-07 10:07:37 [INFO] train - Metrics successfully exported to outputs/exp09_k4_s3407/metrics.json

@@ -22,9 +22,9 @@ ENV/
 miniconda3/
 
 # Model Checkpoints & Large Binaries (Strictly Ignored)
-checkpoints/*
-!checkpoints/.gitkeep
-weights/*
+checkpoints/
+checkpoints_databudget/
+weights/
 *.pt
 *.pth
 *.ckpt
@@ -47,13 +47,10 @@ data/*
 *.npz
 *.parquet
 
-# Training Outputs, TensorBoard & Wandb Runs
-outputs/*
-!outputs/.gitkeep
+# Temporary Training Runs & Profiler Dumps (outputs/ and outputs_databudget/ logs, metrics & JSONs are tracked)
 runs/
 tb_logs/
 wandb/
-*.log
 
 # LaTeX Build Artifacts (the compiled .pdf deliverables are kept)
 *.aux
