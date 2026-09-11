@@ -1,0 +1,67 @@
+{
+  "full_train_samples": 50000,
+  "full_test_samples": 10000,
+  "num_classes": 100,
+  "budgets_evaluated": {
+    "100pc": {
+      "samples_per_class": 100,
+      "total_budget_samples": 10000,
+      "seeds": {
+        "42": {
+          "train_samples": 9000,
+          "val_samples": 1000,
+          "train_per_class": 90,
+          "val_per_class": 10,
+          "is_leakage_free": true,
+          "class_balance_verified": true
+        },
+        "1337": {
+          "train_samples": 9000,
+          "val_samples": 1000,
+          "train_per_class": 90,
+          "val_per_class": 10,
+          "is_leakage_free": true,
+          "class_balance_verified": true
+        },
+        "3407": {
+          "train_samples": 9000,
+          "val_samples": 1000,
+          "train_per_class": 90,
+          "val_per_class": 10,
+          "is_leakage_free": true,
+          "class_balance_verified": true
+        }
+      }
+    },
+    "300pc": {
+      "samples_per_class": 300,
+      "total_budget_samples": 30000,
+      "seeds": {
+        "42": {
+          "train_samples": 27000,
+          "val_samples": 3000,
+          "train_per_class": 270,
+          "val_per_class": 30,
+          "is_leakage_free": true,
+          "class_balance_verified": true
+        },
+        "1337": {
+          "train_samples": 27000,
+          "val_samples": 3000,
+          "train_per_class": 270,
+          "val_per_class": 30,
+          "is_leakage_free": true,
+          "class_balance_verified": true
+        },
+        "3407": {
+          "train_samples": 27000,
+          "val_samples": 3000,
+          "train_per_class": 270,
+          "val_per_class": 30,
+          "is_leakage_free": true,
+          "class_balance_verified": true
+        }
+      }
+    }
+  }
+}
