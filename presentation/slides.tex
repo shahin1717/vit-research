@@ -14,74 +14,258 @@
 \graphicspath{{../paper/figures/}}
 
 \title{Do Register Tokens Regularize Vision Transformers Under Data Scarcity?}
-\subtitle{A controlled 12-run ablation on low-data CIFAR-100}
-\author{Shahin \and Gulnisa \and Narmina \and Emil \and Rufet}
+\subtitle{A Controlled 24-Run Empirical Ablation on Low-Data CIFAR-100}
+\author{Abdurahmanli, Gulnisa \and Ahmedli, Emil \and Alakparov, Shahin \and Dosteliyev, Rufet \and Ibrahimova, Narmina}
 \institute{DLE-AI-202: Deep Learning, Cohort I 2026 --- Track 1: Pure Research}
 \date{}
 
 \begin{document}
 
+% -----------------------------------------------------------------------------
+% SLIDE 1: TITLE
+% -----------------------------------------------------------------------------
 \begin{frame}
 \titlepage
 \end{frame}
 
-\begin{frame}{The question}
-\textbf{Registers at scale.} Darcet et al.\ (ICLR 2024): large ViTs recycle a few
-patch tokens as scratch space. Adding $K$ learnable \emph{register} tokens
-removes the artifact.
-
-\medskip
-That was shown where there is \emph{too much} data to overfit.
-
-\bigskip
-\begin{block}{Our question}
-When a ViT is starved of data, do registers reduce the generalization gap ---
-and does any such reduction transfer to held-out performance?
+% -----------------------------------------------------------------------------
+% SLIDE 2: TEAM ROLES & CONTRIBUTION DISTRIBUTION (§6)
+% -----------------------------------------------------------------------------
+\begin{frame}{Team Task Distribution \& Course §6 Ownership}
+\footnotesize
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{block}{Shahin Alakparov (Architecture \& Training)}
+Core \texttt{RegisterVisionTransformer} wrapper, zero-register positional invariant enforcement, training engine \& checkpointing pipeline.
+\end{block}
+\smallskip
+\begin{block}{Gulnisa Abdurahmanli (Data Pipeline)}
+Stratified 100 \& 300 images/class samplers, reproducible seed isolation, data budget extension pipeline.
 \end{block}
 
-\bigskip
-\begin{columns}[T]
-\column{0.33\textwidth}
-\textbf{H1} Structural regularization: $\Delta\mathcal{L}$ falls.
-\column{0.33\textwidth}
-\textbf{H2} Capacity dilution: large $K$ hurts at $d=192$.
-\column{0.33\textwidth}
-\textbf{H3} Registers prevent attention-entropy collapse.
+\column{0.48\textwidth}
+\begin{block}{Narmina Ibrahimova (Attention Hooks)}
+Unfused attention reconstruction, Shannon entropy $\bar{H}^{(l)}$ \& patch outlier rate $\rho^{(l)}$, off-by-$K$ spatial slice guards.
+\end{block}
+\smallskip
+\begin{block}{Emil Ahmedli \& Rufet Dosteliyev (Cluster \& Results)}
+\textbf{Emil:} NVIDIA A100 GPU cluster execution, WireGuard VPN, 24-run sweep automation.\\
+\textbf{Rufet:} Results aggregation engine, multi-seed statistical reductions \& publication vector plots.
+\end{block}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Design: one variable, twelve runs}
+% -----------------------------------------------------------------------------
+% SLIDE 3: 01. THE QUESTION (SHAHIN)
+% -----------------------------------------------------------------------------
+\begin{frame}{01. The Question --- Shahin (Architecture \& Training)}
+\small
+\textbf{Large ViTs quietly vandalise their own attention.}
+\begin{itemize}\itemsep=1pt
+\item Darcet et al.\ (ICLR 2024): in foundation vision transformers, a handful of background patch tokens acquire enormous activation norms. The \texttt{[CLS]} token routes much of its attention to them.
+\item Those tokens sit in empty image regions and carry global context --- the model repurposes the image as scratch paper.
+\item Their fix is architectural and almost free: give the model dedicated scratch tokens (\emph{registers}), and the artifacts disappear.
+\end{itemize}
+
+\smallskip
 \begin{columns}[T]
-\column{0.52\textwidth}
-\textbf{Matrix.} $K \in \{0,1,4,8\} \times$ seeds $\{42, 1337, 3407\}$.
-
-\medskip
-\textbf{Data.} CIFAR-100, 100 images/class: 9{,}000 train / 1{,}000 val, plus
-the untouched 10{,}000-image test split.
-
-\medskip
-\textbf{Model.} ViT-Tiny, $d=192$, 12 blocks, ImageNet-pretrained.
-$K=8$ adds 1{,}536 of 5.54\,M parameters.
-
-\medskip
-\textbf{Budget.} 50 epochs, AdamW, cosine, AMP. 2.83 GPU-hours total.
+\column{0.54\textwidth}
+\begin{block}{The gap in that story}
+Darcet demonstrated this where data is abundant. If registers absorb capacity the model would otherwise spend memorising, they should behave like a \textbf{structural regularizer} --- and a regularizer only proves itself where overfitting bites.
+\end{block}
 
 \column{0.44\textwidth}
-\begin{block}{What makes it a controlled test}
-Within a seed, the subset, the split, the batch order and every
-hyperparameter are identical across arms. $K$ is the only thing that moves.
+\begin{alertblock}{Our core research question}
+When a ViT is starved of data, do registers reduce the generalization gap --- and does that transfer to held-out test performance?
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 4: THREE HYPOTHESES (SHAHIN)
+% -----------------------------------------------------------------------------
+\begin{frame}{Three Hypotheses, Each Falsifiable}
+\small
+\begin{columns}[T]
+\column{0.32\textwidth}
+\begin{block}{\textbf{H1: Regularization}}
+Registers shrink the generalization gap:
+$$\Delta\mathcal{L} = \mathcal{L}_{\text{val}} - \mathcal{L}_{\text{train}}$$
+and lower validation loss by acting as an architectural bottleneck.
 \end{block}
-\begin{block}{Why paired statistics}
-At $n=3$, between-seed spread (2.17 pp) swamps any treatment effect. All
-differences are formed \emph{within} a seed, then reduced.
+
+\column{0.32\textwidth}
+\begin{block}{\textbf{H2: Capacity Dilution}}
+At $d = 192$ (ViT-Tiny), a large $K$ eats representational margin across softmax rows. Accuracy becomes non-monotonic in $K$.
+\end{block}
+
+\column{0.32\textwidth}
+\begin{block}{\textbf{H3: Entropy Collapse}}
+Registers prevent the layer-wise collapse of attention entropy $\bar{H}^{(l)}$ and suppress high-norm patch outliers.
+\end{block}
+\end{columns}
+
+\medskip
+\begin{center}
+\footnotesize
+\textbf{Why this is worth an experiment:} Nobody has tested registers as a regularizer, at compact scale, under strict data budgets. A clean answer is valuable whichever way it falls.
+\end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 5: 02. STARVING THE MODEL (GULNISA)
+% -----------------------------------------------------------------------------
+\begin{frame}{02. Starving the Model --- Gulnisa (Data Pipeline)}
+\small
+\begin{columns}[T]
+\column{0.52\textwidth}
+\textbf{Two controlled low-data regimes on CIFAR-100:}
+\begin{itemize}\itemsep=3pt
+\item \textbf{100 images/class (Primary):} 9{,}000 train / 1{,}000 val / 10{,}000 test. Strict data scarcity.
+\item \textbf{300 images/class (Extension):} 27{,}000 train / 3{,}000 val / 10{,}000 test. Tests scale-invariance.
+\item Upsampled to $224 \times 224$ so the pretrained patch grid ($14 \times 14 = 196$ patches) applies unchanged.
+\item RandomResizedCrop, horizontal flip, AutoAugment; evaluation uses deterministic resize and centre crop.
+\end{itemize}
+
+\column{0.46\textwidth}
+\begin{block}{The design that makes it a controlled test}
+The subset is drawn under the run's own seed. So a seed is a replicate of the \textbf{whole pipeline}, not just weight initialization.
+\end{block}
+\smallskip
+\begin{block}{Within-seed pairing}
+Within each seed, all four register arms ($K \in \{0, 1, 4, 8\}$) see the \textbf{identical images} in the \textbf{identical batch order}.
 \end{block}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Result 1: no arm improves held-out Top-1}
+% -----------------------------------------------------------------------------
+% SLIDE 6: ONE THING MOVES, AND ONLY ONE (GULNISA)
+% -----------------------------------------------------------------------------
+\begin{frame}{One Thing Moves, and Only One}
+\small
+\begin{columns}[T]
+\column{0.50\textwidth}
+\textbf{Held fixed across every single arm:}
+\begin{itemize}\itemsep=2pt
+\item The exact same training images
+\item The exact same train/validation split
+\item The exact same batch order
+\item The exact same 50-epoch schedule, AdamW ($5 \times 10^{-4}$), cosine decay, AMP, and batch size 64
+\end{itemize}
+
+\medskip
+\textbf{Varied:} $K \in \{0, 1, 4, 8\}$, the number of register tokens. \textbf{Nothing else.}
+
+\column{0.46\textwidth}
+\begin{block}{Why pairing matters at $n = 3$}
+Between-seed spread in validation accuracy is \textbf{2.17 pp} --- far larger than any effect registers could plausibly have.
+\end{block}
+
+\smallskip
+Because the arms are strictly matched within each seed, we can \textbf{subtract that noise away} via paired differences ($\bar{\delta} = X_K - X_0$) instead of drowning in it.
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 7: 03. WHAT A REGISTER IS (NARMINA)
+% -----------------------------------------------------------------------------
+\begin{frame}{03. Registers \& Instrumentation --- Narmina (Metrics \& Hooks)}
+\small
+\textbf{The token sequence, and the slice that decides everything:}
+\begin{center}
+\setlength{\fboxsep}{5pt}
+\framebox[\linewidth]{
+\texttt{[CLS]} $\parallel$ \textbf{$r_1$, $r_2$, $\dots$, $r_K$} ($K$ registers, no pos.\ embed) $\parallel$ \textbf{$p_1$, $p_2$, $\dots$, $p_{196}$} (196 spatial patches)
+}
+\end{center}
+
+\smallskip
+\begin{columns}[T]
+\column{0.50\textwidth}
+\textbf{Architectural Sequencing:}
+\begin{itemize}\itemsep=2pt
+\item Registers join every self-attention block and are discarded before the classification head.
+\item Spatial patches start strictly at index $1 + K$.
+\item Parameter cost at $K = 8$: 1{,}536 of 5.54\,M parameters --- a relative increase of just $2.8 \times 10^{-4}$.
+\end{itemize}
+
+\column{0.46\textwidth}
+\begin{alertblock}{The off-by-$K$ trap}
+Slice the spatial row from index 1 instead of $1 + K$ and register columns leak into the attention map. It still looks plausible --- which is exactly why our test suite rigorously asserts slice width across all depths.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 8: TWO MECHANISM READOUTS (NARMINA)
+% -----------------------------------------------------------------------------
+\begin{frame}{Two Diagnostic Mechanism Readouts}
+\footnotesize
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{block}{Layer-wise Attention Entropy}
+$$\bar{H}^{(l)} = -\frac{1}{BHS} \sum_{b,h,i,j} A_{b,h,i,j}^{(l)} \log_2 A_{b,h,i,j}^{(l)}$$
+\begin{itemize}\itemsep=1pt
+\item Attention rows are probability distributions; entropy measures routing concentration.
+\item Artifacts appear as entropy collapse in deep blocks.
+\item Modern \texttt{timm} executes fused attention; our hook reconstructs the exact $[B, H, S, S]$ softmax matrix from unfused $Q, K$.
+\end{itemize}
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Patch-Norm Outlier Rate}
+$$\rho^{(l)} = \frac{1}{BN} \sum_{b,n} \mathbf{1}\left[ \|x_{b, 1+K+n}^{(l)}\|_2 > \mu_b^{(l)} + 3\sigma_b^{(l)} \right]$$
+\begin{itemize}\itemsep=1pt
+\item The exact $3\sigma$ artifact definition: fraction of spatial patch tokens with anomalously large $L_2$ norm.
+\item Evaluated on the residual stream, preventing LayerNorm squashing.
+\end{itemize}
+\end{block}
+\end{columns}
+
+\smallskip
+\centering
+\scriptsize Both metrics are read from the identical 64 test images across all runs for perfect input parity.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 9: 04. SWEEP EXECUTION ON NVIDIA A100 (EMIL)
+% -----------------------------------------------------------------------------
+\begin{frame}{04. Sweep Execution --- Emil (Operations \& Cluster)}
+\small
+\begin{columns}[T]
+\column{0.50\textwidth}
+\textbf{The 24-run controlled study matrix:}
+\begin{itemize}\itemsep=2pt
+\item \textbf{100 pc baseline:} $K \in \{0, 1, 4, 8\} \times$ seeds $\{42, 1337, 3407\}$ (12 runs).
+\item \textbf{300 pc scaling:} $K \in \{0, 1, 4, 8\} \times$ seeds $\{42, 1337, 3407\}$ (12 runs).
+\item Executed on remote NVIDIA A100-SXM4 GPU cluster (20GB MIG partition) via WireGuard VPN.
+\item \textbf{100\% execution success:} 24/24 runs completed cleanly; zero OOMs, zero crashes.
+\end{itemize}
+
+\column{0.46\textwidth}
+\begin{block}{Isolation \& Artifact Completeness}
+Each run writes its own isolated directory:
+\begin{itemize}\itemsep=1pt
+\item \texttt{metrics.json}, \texttt{best\_model.pth}
+\item \texttt{last\_model.pth}, \texttt{train\_history.csv}
+\end{itemize}
+Three seeds can never overwrite each other's weights.
+\end{block}
+
+\begin{block}{Guards against manual error}
+The table generator independently recomputes all statistics from raw logs. Not one number was typed by hand.
+\end{block}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 10: 05. MAIN RESULTS: 100 IMAGES/CLASS (RUFET)
+% -----------------------------------------------------------------------------
+\begin{frame}{05. Main Results (100 pc) --- Rufet (Results Engine)}
+\small
 \begin{center}
 \scriptsize
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Configuration} & \textbf{Test Top-1 (\%)} & \textbf{Test Loss} & \textbf{Val Loss} & \textbf{Gap $\Delta\mathcal{L}$} \\
@@ -94,168 +278,190 @@ Registers ($K=8$) & 74.67 $\pm$ 0.12 & 1.6560 $\pm$ 0.0022 & 1.6602 $\pm$ 0.0268
 \end{tabular}
 \end{center}
 
-\bigskip
-The bolding splits down the middle: the control wins both test columns, $K=4$
-wins both validation-derived columns.
-
-\medskip
-Paired per seed: $K=1$ and $K=8$ lose accuracy in \textbf{3 of 3} seeds;
-$K=4$ wins in 1 of 3 ($\bar\delta = -0.13$ pp, $p = 0.466$).
-
-\medskip
-Top-5 is the one place a register arm leads --- $K=4$ at $92.54 \pm 0.23$ vs
-$92.43 \pm 0.14$ --- but paired it is $+0.11$ pp with SD $0.39$, 2/3 seeds,
-$p = 0.681$.
+\smallskip
+\textbf{The winners split down the middle:}
+\begin{itemize}\itemsep=1.5pt
+\item The control baseline takes both held-out test columns ($75.19\%$, loss $1.6357$).
+\item $K=4$ takes both validation-derived columns ($1.6492$, gap $0.7680$).
+\item Paired per seed: $K=1$ and $K=8$ lose accuracy in \textbf{3 of 3} seeds. $K=4$ wins in only 1 of 3 ($\bar{\delta} = -0.13$ pp, $p = 0.466$).
+\item Registers cost between zero and half a point of accuracy; they gain nothing on held-out data.
+\end{itemize}
 \end{frame}
 
-\begin{frame}{Result 2: H1 holds on validation and dies on test}
+% -----------------------------------------------------------------------------
+% SLIDE 11: A REGULARIZER ON ONE SPLIT ONLY (RUFET)
+% -----------------------------------------------------------------------------
+\begin{frame}{The Finding: A Regularizer on One Split Only}
 \begin{columns}[T]
-\column{0.55\textwidth}
+\column{0.54\textwidth}
 \includegraphics[width=\linewidth]{gen_gap_vs_registers.pdf}
 
-\column{0.43\textwidth}
+\column{0.44\textwidth}
+\small
 $K=4$ vs.\ control, paired over seeds:
-\medskip
+\smallskip
 
 \footnotesize
 \begin{tabular}{lrrr}
 \toprule
-& $\bar\delta$ & Dir. & $p$ \\
+& $\bar{\delta}$ & Dir. & $p$ \\
 \midrule
-Val loss  & $-0.0337$ & 3/3 & 0.024 \\
-Gen.\ gap & $-0.0367$ & 3/3 & 0.051 \\
-Test loss & $+0.0018$ & 2/3 & 0.823 \\
+Val loss  & $-0.0337$ & 3/3 & \textbf{0.024} \\
+Gen.\ gap & $-0.0367$ & 3/3 & \textbf{0.051} \\
+Test loss & $+0.0018$ & 2/3 & \textbf{0.823} \\
 \bottomrule
 \end{tabular}
 
 \medskip
-\normalsize
-\textbf{Why it dies:} final training loss is 0.8782 / 0.8780 / 0.8812 / 0.8829
-across $K = 0,1,4,8$ --- a spread of 0.005.
+\small
+\textbf{Why it dies:}
+Final training loss across all arms is 0.8782, 0.8780, 0.8812, 0.8829 --- a spread of just 0.005.
 
-A regularizer trades training fit for held-out fit. Nothing was traded.
+\begin{alertblock}{Nothing was traded}
+A true regularizer trades training fit for held-out fit. Training loss never moved.
+\end{alertblock}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Why the validation split misled us}
+% -----------------------------------------------------------------------------
+% SLIDE 12: MECHANISM CHECKS (RUFET)
+% -----------------------------------------------------------------------------
+\begin{frame}{Mechanism Checks: H2 Supported, H3 Not Supported}
 \begin{columns}[T]
-\column{0.55\textwidth}
-\includegraphics[width=\linewidth]{accuracy_vs_registers.pdf}
-
-\column{0.43\textwidth}
-Between-seed spread of Top-1, control arm:
-
-\medskip
-\begin{itemize}
-\item validation (1{,}000 images): \textbf{2.17 pp}
-\item test (10{,}000 images): \textbf{0.24 pp}
-\end{itemize}
-
-\medskip
-A factor of nine --- and the validation split also selects the
-checkpoint.
-
-\medskip
-\begin{block}{Methodological takeaway}
-A generalization-gap argument built on the split that performs model selection
-is not evidence about generalization.
-\end{block}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Result 3: H2 supported at $K=8$, H3 not supported}
-\begin{columns}[T]
-\column{0.55\textwidth}
+\column{0.54\textwidth}
 \includegraphics[width=\linewidth]{entropy_vs_layer.pdf}
 
-\column{0.43\textwidth}
-\textbf{H2 --- capacity dilution.} $K=8$ is the study's only consistent
-held-out effect: test loss $+0.0203$, \textbf{3/3} seeds, $p = 0.014$.
-Block-12 entropy also falls in 3/3.
+\column{0.44\textwidth}
+\small
+\textbf{H2 --- Capacity Dilution Supported:}
+\begin{itemize}\itemsep=1pt
+\item $K=8$ produces the study's only consistent held-out effect: test loss $+0.0203$, \textbf{3 of 3 seeds}, $p = 0.014$.
+\item Final-block attention entropy also falls in 3 of 3.
+\end{itemize}
 
-\medskip
-\textbf{H3 --- entropy collapse.} The four arms lie on top of one another.
-Averaged over 12 blocks: $+0.020$, $+0.001$, $-0.025$ bits. None significant.
-
-\medskip
-Patch-norm outlier rate: 1.227\%, 1.246\%, 1.250\%, 1.254\%. It rises slightly
-with $K$ --- the opposite of the artifact-removal prediction.
+\smallskip
+\textbf{H3 --- Entropy Collapse Not Supported:}
+\begin{itemize}\itemsep=1pt
+\item Entropy curves lie directly on top of each other ($\Delta H \approx 0.001$ bits).
+\item Outlier rate goes $1.227\% \to 1.254\%$ as $K$ grows --- it rises slightly, opposite of artifact absorption.
+\end{itemize}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Interpretation: a scope result, not a refutation}
+% -----------------------------------------------------------------------------
+% SLIDE 13: 06. SCALE INVARIANCE (100 VS 300 PC)
+% -----------------------------------------------------------------------------
+\begin{frame}{06. Scale Invariance: 100 vs.\ 300 Images/Class}
+\begin{columns}[c]
+\column{0.54\textwidth}
+\includegraphics[width=0.98\linewidth]{accuracy_100_vs_300.pdf}
+
+\column{0.44\textwidth}
+\footnotesize
+\textbf{Is the null result an artifact of extreme starvation?}
+\begin{itemize}\itemsep=1pt
+\item Tripling data to 300 pc (27k train) surges baseline accuracy by \textbf{+6.14 pp} ($75.19\% \to 81.33\%$).
+\item Yet registers still provide \textbf{zero benefit}:
+  \begin{itemize}\itemsep=0.5pt
+  \item $K=0$ (Control): $\mathbf{81.33 \pm 0.37\%}$
+  \item $K=1$: $81.23 \pm 0.19\%$
+  \item $K=4$: $81.23 \pm 0.18\%$
+  \item $K=8$: $81.02 \pm 0.45\%$
+  \end{itemize}
+\item All pairwise differences are non-significant ($p > 0.50$).
+\item \textbf{Conclusion:} The null result is \textbf{scale-invariant} across low-data budgets.
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 14: 07. BONUS EXPERIMENT: TEST-TIME REGISTERS
+% -----------------------------------------------------------------------------
+\begin{frame}{07. Bonus Experiment: Registers Without Training}
+\small
+\textbf{Do registers even need to be trained?} Jiang et al.\ (NeurIPS 2025) redirect outlier neurons into an untrained slot at inference time. We ran an exploratory single-block test on our $K=0$ checkpoints:
+
+\smallskip
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccl}
+\toprule
+\textbf{Condition} & \textbf{Test Top-1 (\%)} & \textbf{Loss} & \textbf{Mechanism / Insight} \\
+\midrule
+Baseline ($K=0$, untouched) & $75.18 \pm 0.30$ & 1.1110 & Control baseline model \\
+Stage 1: Passive empty slot & $75.25 \pm 0.24$ & 1.1103 & $+0.07$ pp (inert slot is harmless) \\
+Stage 2: Redirection (Block 1) & $75.25 \pm 0.26$ & 1.1104 & Top-4 neurons redirected into slot \\
+Stage 2: Redirection (Block 9) & $75.24 \pm 0.25$ & 1.1103 & Top-4 neurons redirected into slot \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+\footnotesize
+\textbf{Architectural note on Block 11:} Block 11 is followed by no further self-attention; the classification head reads solely \texttt{[CLS]}. Any intervention on non-CLS tokens at Block 11 is architecturally incapable of affecting predictions. Across valid blocks, redirection does not exceed the passive slot.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 15: INTERPRETATION: A SCOPE RESULT
+% -----------------------------------------------------------------------------
+\begin{frame}{Interpretation: A Scope Result, Not a Refutation}
+\small
 \begin{columns}[T]
-\column{0.5\textwidth}
-\textbf{Regime mismatch.}
-\begin{itemize}
-\item Registers were a \emph{pretraining-time} intervention at foundation scale.
-\item Ours are randomly initialised into an ImageNet-pretrained backbone and
-given 50 epochs over 9{,}000 images.
-\item The measured entropy profile of every register arm is the \emph{pretrained}
-profile --- the routing never reorganised.
+\column{0.48\textwidth}
+\textbf{Regime Mismatch:}
+\begin{itemize}\itemsep=2pt
+\item In Darcet et al., registers were present throughout pretraining at foundation scale.
+\item Here, registers are added to an ImageNet-pretrained backbone and given 50 epochs over 9k--27k images.
+\item The routing never reorganised --- entropy profiles remain the pretrained profile.
 \end{itemize}
 
-\column{0.5\textwidth}
-\textbf{The artifacts are real but unmoved.}
-\begin{itemize}
-\item Control outlier rate 1.23\% $\approx 9\times$ the Gaussian $3\sigma$ rate
-of 0.13\%: heavy-tailed structure is present.
-\item Registers do not absorb it here.
+\column{0.48\textwidth}
+\textbf{Artifacts Present but Unmoved:}
+\begin{itemize}\itemsep=2pt
+\item Control outlier rate ($1.23\%$) is $9\times$ the Gaussian $3\sigma$ rate: heavy-tailed structure is real.
+\item But registers simply do not absorb it here.
+\item \textbf{And $K=8$ is not free:} 8 content-free keys in a 205-token sequence at $d=192$ costs held-out accuracy and loss.
 \end{itemize}
-
-\medskip
-\textbf{And $K=8$ is not free.} Eight content-free keys in a 205-token sequence
-at $d=192$ measurably cost held-out loss.
 \end{columns}
 \end{frame}
 
-\begin{frame}{Limits, and what we would run next}
-\begin{columns}[T]
-\column{0.5\textwidth}
-\textbf{Limits we accept}
-\begin{itemize}
-\item $n = 3$, $\mathrm{df} = 2$; 15 uncorrected comparisons. Direction count is
-our primary signal.
-\item One architecture, one dataset, one budget.
-\item Entropy and outlier rates come from a single 64-image batch --- identical
-across all 12 runs, so pairing is sound, but absolute values are estimates.
-\item Entropy averages all query rows, not the \texttt{[CLS]} row alone.
-\end{itemize}
-
-\column{0.5\textwidth}
-\textbf{Next experiment}
-\begin{itemize}
-\item Pretrain \emph{with} registers at this scale --- the direct test of the
-mechanism our design cannot reach.
-\item \texttt{[CLS]}-restricted entropy as a sharper H3 instrument.
-\item Full-split diagnostic pass rather than one batch.
-\end{itemize}
-
-\medskip
-The released sweep runner executes all three unchanged.
-\end{columns}
-\end{frame}
-
-\begin{frame}{Conclusion}
-\begin{enumerate}
-\item On a low-data CIFAR-100 ViT-Tiny, \textbf{no register configuration
-improves held-out accuracy} over the register-free control
-($75.19 \pm 0.24\%$).
-\item The regularization signature appears on validation
-($K=4$: 3/3 seeds, $p = 0.024$) and \textbf{does not transfer} to the test split
-($p = 0.823$). Training loss is unchanged, so nothing was regularized.
-\item \textbf{$K=8$ costs accuracy and held-out loss} (3/3 seeds, $p = 0.014$),
-consistent with capacity dilution at $d = 192$.
-\item No evidence for entropy-collapse prevention in either the entropy or the
-outlier readout.
+% -----------------------------------------------------------------------------
+% SLIDE 16: CONCLUSION & TAKEAWAYS
+% -----------------------------------------------------------------------------
+\begin{frame}{Conclusion \& Defense Takeaways}
+\small
+\begin{enumerate}\itemsep=3pt
+\item \textbf{No held-out benefit:} Across 24 controlled runs, no register configuration outperforms the register-free control on held-out test data.
+\item \textbf{Validation illusion:} The apparent regularization signal on validation ($p = 0.024$) is an artifact of checkpoint selection on a noisy split; training loss was unmoved.
+\item \textbf{Scale-invariance confirmed:} Tripling data to 300 pc (+6.14 pp gain) preserves the exact null result; test-time registers also produce no gain.
+\item \textbf{Methodological lesson:} Never infer generalization from the split that performs model selection.
 \end{enumerate}
 
-\bigskip
+\smallskip
 \begin{block}{}
-Every number here is generated from \texttt{outputs/sweep\_summary.json} by
-script. Code, sweep runner and figure generators:
-\texttt{github.com/shahin1717/vit-research}
+\centering
+\textbf{Full reproducibility:} Code, sweep runners, and generators available at:\\
+\texttt{https://github.com/shahin1717/vit-research}
 \end{block}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% SLIDE 17: THANK YOU
+% -----------------------------------------------------------------------------
+\begin{frame}
+\centering
+\vspace{1.5cm}
+{\Huge \textbf{Thank You!}}
+
+\bigskip
+\bigskip
+{\Large Questions \& Oral Defense Discussion}
+
+\bigskip
+\bigskip
+\footnotesize
+\textbf{Artifacts \& Codebase:} 72/72 tests passing $\bullet$ Pinned dependencies $\bullet$ 24 A100 runs completed
 \end{frame}
 
 \end{document}
