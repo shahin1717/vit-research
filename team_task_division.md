@@ -31,11 +31,11 @@ graph TD
 
 | Member | Primary Ownership | Assigned Code & Files | Core Deliverable | Target Delivery |
 |---|---|---|---|---|
-| **Gulnisa** | **Data Engineering & Low-Data Pipeline** | `src/data/cifar100_subset.py`<br>`src/data/__init__.py` | Stratified 10k CIFAR-100 loader (100 samples/class) + augmentations | **Sun 30 Aug, 14:00** |
+| **Gulnisa** | **Data Engineering & Multi-Budget Pipeline** | `src/data/cifar100_subset.py`<br>`src/data/__init__.py` | Stratified CIFAR-100 loaders (100 & 300 samples/class: 10k & 30k images) | **Sun 30 Aug, 14:00** |
 | **Narmina** | **Diagnostic Metrics & Attention Hooks** | `src/models/attention_hook.py`<br>`src/metrics/entropy.py`<br>`src/metrics/outliers.py`<br>`src/metrics/generalization.py` | Shannon entropy, patch-norm outlier rate ($\mu + 3\sigma$), and forward hooks | **Sun 30 Aug, 16:00** |
 | **Shahin** | **Core Architecture & Training Engine** | `src/models/register_vit.py`<br>`scripts/train.py`<br>`scripts/eval.py` | `RegisterVisionTransformer` wrapper ($K \in \{0, 1, 4, 8\}$) + AMP training loop | **Sun 30 Aug, 18:00** |
-| **Emil** | **Ablation Sweeps & Execution Harness** | `scripts/run_sweep.sh`<br>`configs/*.yaml`<br>`src/utils/logger.py` | Automated 12-run sweep runner ($4 \times 3$ seeds) + GPU VRAM safety | **Mon 31 Aug, 12:00** |
-| **Rufet** | **Analysis, Visualizations & LaTeX Paper** | `scripts/visualize_attention.py`<br>`scripts/plot_metrics.py`<br>`paper/sections/*.tex`<br>`presentation/slides.md` | Heatmap generation, entropy curves, and LaTeX manuscript integration | **Mon 31 Aug, 18:00** |
+| **Emil** | **Ablation Sweeps & Cluster Hardware** | `scripts/run_sweep.sh`<br>`scripts/run_databudget_sweep.sh`<br>`configs/*.yaml`, `team1.conf` | Automated 24-run sweep execution ($12 \times 100\text{pc}$ + $12 \times 300\text{pc}$) on A100 | **Mon 31 Aug, 12:00** |
+| **Rufet** | **Ablation Analytics, Figures & Paper** | `src/utils/aggregate_databudget.py`<br>`scripts/plot_metrics.py`<br>`scripts/plot_databudget_comparison.py`<br>`paper/` | Multi-seed reduction, comparison figures, LaTeX manuscript & slides | **Mon 31 Aug, 18:00** |
 
 ---
 
@@ -43,22 +43,22 @@ graph TD
 
 ---
 
-### 1️⃣ Gulnisa — Data Engineering & Low-Data Pipeline
+### 1️⃣ Gulnisa — Data Engineering & Multi-Budget Pipeline
 
 * **Role:** Lead Data Engineer  
 * **Target Files:**
   * [`src/data/cifar100_subset.py`](file:///home/shahin/aiac-res/src/data/cifar100_subset.py)
   * [`src/data/__init__.py`](file:///home/shahin/aiac-res/src/data/__init__.py)
 * **Context & Objectives:**  
-  Our study investigates ViTs under extreme data scarcity. We need an exact, stratified subset of CIFAR-100 containing exactly 100 images per class (10,000 total images). This must be strictly controlled with random seeds to ensure 100% reproducibility and zero data leakage.
+  Our study investigates ViTs under data scarcity across multiple budget scales. We need an exact, stratified subset of CIFAR-100 supporting both **100 images/class** (10,000 total images) and **300 images/class** (30,000 total images). This must be strictly controlled with random seeds to ensure 100% reproducibility and zero data leakage.
 
 #### Concrete Tasks:
 1. **Implement `StratifiedCIFAR100Subset` Dataset Class:**
    * Load CIFAR-100 via `torchvision.datasets.CIFAR100(root='./data', train=True, download=True)`.
-   * For each class $c \in \{0, \dots, 99\}$, extract image indices and randomly sample exactly 100 samples using a fixed `torch.Generator().manual_seed(seed)`.
-   * Partition the 10,000 images into:
-     * **Training Split:** 9,000 images (90 samples per class).
-     * **Validation Split:** 1,000 images (10 samples per class).
+   * For each class $c \in \{0, \dots, 99\}$, extract image indices and randomly sample `samples_per_class` ($100$ or $300$) using a fixed `torch.Generator().manual_seed(seed)`.
+   * Partition images into a deterministic 90% training / 10% validation split:
+     * **100pc Budget:** 9,000 train / 1,000 val.
+     * **300pc Budget:** 27,000 train / 3,000 val.
    * Ensure standard CIFAR-100 test set ($10{,}000$ images) is loaded separately for final evaluation.
 2. **Configure Data Augmentations:**
    * **Training Transform:**
@@ -75,13 +75,9 @@ graph TD
 3. **Expose Main Loader Function:**
    ```python
    def get_cifar100_loaders(data_dir: str = "./data", batch_size: int = 64, samples_per_class: int = 100, seed: int = 42, num_workers: int = 4):
-       """Returns (train_loader, val_loader, test_loader)."""
+       """Returns (train_loader, val_loader, test_loader) for arbitrary samples_per_class."""
    ```
-* **Definition of Done:** Running `python src/data/cifar100_subset.py` prints:
-  * `Train batches: 141 (9,000 samples)`
-  * `Val batches: 16 (1,000 samples)`
-  * `Test batches: 157 (10,000 samples)`
-  * Batch tensor shape `torch.Size([64, 3, 224, 224])` with verified balanced class distributions.
+* **Definition of Done:** Running `python src/data/cifar100_subset.py` verifies both 100pc (9k/1k) and 300pc (27k/3k) splits with zero cross-set leakage and exact class balancing.
 
 ---
 
@@ -154,74 +150,60 @@ graph TD
 
 ---
 
-### 4️⃣ Emil — Sweep Orchestration, Configs & Hardware Execution
+### 4️⃣ Emil — Ablation Sweeps, Runner Automation & Cluster Execution
 
 * **Role:** Automation & Experiment Operations Lead  
 * **Target Files:**
-  * [`scripts/run_sweep.sh`](file:///home/shahin/aiac-res/scripts/run_sweep.sh)
-  * [`configs/baseline_k0.yaml`](file:///home/shahin/aiac-res/configs/baseline_k0.yaml), [`configs/vit_tiny_k1.yaml`](file:///home/shahin/aiac-res/configs/vit_tiny_k1.yaml), [`configs/vit_tiny_k4.yaml`](file:///home/shahin/aiac-res/configs/vit_tiny_k4.yaml), [`configs/vit_tiny_k8.yaml`](file:///home/shahin/aiac-res/configs/vit_tiny_k8.yaml)
-  * [`src/utils/logger.py`](file:///home/shahin/aiac-res/src/utils/logger.py)
+  * [`scripts/run_sweep.sh`](file:///home/shahin/aiac-res/scripts/run_sweep.sh) (100pc baseline runner)
+  * [`scripts/run_databudget_sweep.sh`](file:///home/shahin/aiac-res/scripts/run_databudget_sweep.sh) (300pc scaling runner)
+  * [`configs/*.yaml`](file:///home/shahin/aiac-res/configs/) (All 8 configuration profiles)
+  * [`team1.conf`](file:///home/shahin/aiac-res/team1.conf) (WireGuard cluster access profile)
 * **Context & Objectives:**  
-  Execute the full 12-run ablation matrix ($K \in \{0, 1, 4, 8\} \times 3\text{ seeds}$) with automated error recovery, GPU memory clearing, and structured JSON output aggregation.
+  Execute the full 24-run ablation matrix ($K \in \{0, 1, 4, 8\} \times 3\text{ seeds}$ across both 100pc and 300pc budgets) with automated error recovery, GPU memory clearing, and background process persistence on the NVIDIA A100-SXM4 GPU cluster.
 
 #### Concrete Tasks:
 1. **Experiment Configurations (`configs/*.yaml`):**
-   * Prepare and verify 4 distinct config templates:
-     * `baseline_k0.yaml` ($K=0$, Control Baseline)
-     * `vit_tiny_k1.yaml` ($K=1$, Minimal Register Injection)
-     * `vit_tiny_k4.yaml` ($K=4$, Standard Register Allocation)
-     * `vit_tiny_k8.yaml` ($K=8$, Capacity Dilution Stress Test)
+   * Prepare and verify 8 distinct config templates:
+     * Baseline 100pc: `baseline_k0.yaml`, `vit_tiny_k1.yaml`, `vit_tiny_k4.yaml`, `vit_tiny_k8.yaml`.
+     * Scaling 300pc: `baseline_k0_300pc.yaml`, `vit_tiny_k1_300pc.yaml`, `vit_tiny_k4_300pc.yaml`, `vit_tiny_k8_300pc.yaml`.
    * Parameterize each config for random seeds $\{42, 1337, 3407\}$.
-2. **Automated Sweep Script (`scripts/run_sweep.sh`):**
-   * Write bash script to sequentially trigger all 12 experiments:
-     ```bash
-     #!/bin/bash
-     set -e
-     SEEDS=(42 1337 3407)
-     REGISTERS=(0 1 4 8)
-     for k in "${REGISTERS[@]}"; do
-       for seed in "${SEEDS[@]}"; do
-         echo "==> Running K=${k}, Seed=${seed}..."
-         python scripts/train.py --num_registers $k --seed $seed
-       done
-     done
-     ```
-   * Include `torch.cuda.empty_cache()` between runs and log stdout/stderr to `outputs/sweep.log`.
-3. **Metrics Aggregator Utility (`src/utils/logger.py`):**
-   * Parse output JSON files from `outputs/` and compute $\text{Mean} \pm \text{Std}$ for Top-1 Acc, Validation Loss, and Shannon Entropy for each treatment arm.
-   * Export summary matrix to `outputs/sweep_summary.json`.
-* **Definition of Done:** `bash scripts/run_sweep.sh` runs sequentially without GPU OOM crashes and produces 12 complete experiment directories inside `outputs/`.
+2. **Automated Sweep Scripts (`scripts/run_sweep.sh` & `scripts/run_databudget_sweep.sh`):**
+   * Write bash runners to sequentially trigger experiments with GPU memory pre-checks:
+   * Include `torch.cuda.empty_cache()` between runs and log stdout/stderr to `outputs/sweep.log` and `outputs_databudget/sweep.log`.
+3. **Cluster Operations & Remote Execution:**
+   * Configure WireGuard VPN tunnel and JupyterLab daemonization on the remote A100 GPU cluster.
+   * Supervise unattended execution of all 24 ablation runs with zero crashes or OOMs.
+* **Definition of Done:** Complete unattended execution of 24 runs ($12 \times 100\text{pc}$ + $12 \times 300\text{pc}$) producing full checkpoint and metric directories.
 
 ---
 
-### 5️⃣ Rufet — Analysis, Visualizations & LaTeX Paper Integration
+### 5️⃣ Rufet — Ablation Analytics, Visualizations & LaTeX Paper Integration
 
 * **Role:** Lead Analyst & Academic Paper / Deck Author  
 * **Target Files:**
+  * [`src/utils/logger.py`](file:///home/shahin/aiac-res/src/utils/logger.py) & [`src/utils/aggregate_databudget.py`](file:///home/shahin/aiac-res/src/utils/aggregate_databudget.py)
+  * [`scripts/plot_metrics.py`](file:///home/shahin/aiac-res/scripts/plot_metrics.py) & [`scripts/plot_databudget_comparison.py`](file:///home/shahin/aiac-res/scripts/plot_databudget_comparison.py)
   * [`scripts/visualize_attention.py`](file:///home/shahin/aiac-res/scripts/visualize_attention.py)
-  * [`scripts/plot_metrics.py`](file:///home/shahin/aiac-res/scripts/plot_metrics.py)
   * [`src/utils/export_latex.py`](file:///home/shahin/aiac-res/src/utils/export_latex.py)
-  * [`paper/sections/04_experimental_setup.tex`](file:///mnt/c/Vaults/aiac-res/paper/sections/04_experimental_setup.tex)
-  * [`paper/sections/05_results_and_analysis.tex`](file:///mnt/c/Vaults/aiac-res/paper/sections/05_results_and_analysis.tex)
+  * [`paper/sections/04_experimental_setup.tex`](file:///mnt/c/Vaults/aiac-res/paper/sections/04_experimental_setup.tex) & [`paper/sections/05_results_and_analysis.tex`](file:///mnt/c/Vaults/aiac-res/paper/sections/05_results_and_analysis.tex)
   * [`presentation/slides.md`](file:///mnt/c/Vaults/aiac-res/presentation/slides.md) & [`presentation/slides.tex`](file:///mnt/c/Vaults/aiac-res/presentation/slides.tex)
 * **Context & Objectives:**  
-  Convert raw experiment logs and model weights into publication-quality figures, write the empirical results sections in LaTeX, and prepare the oral defense presentation.
+  Convert raw ablation logs into multi-seed statistical summaries, render publication-quality comparative figures, author the quantitative results and ablation findings in LaTeX, and prepare the oral defense presentation.
 
 #### Concrete Tasks:
-1. **Attention Map Visualizer (`scripts/visualize_attention.py`):**
-   * Load trained checkpoints ($K=0$ vs. $K=4$).
-   * Extract attention maps from the `[CLS]` token across layers $l \in \{1, 4, 8, 12\}$.
-   * Reshape spatial patch attention to $14 \times 14$ grid, upsample to $224 \times 224$, and overlay with the original test image.
-   * Save side-by-side comparative PDF/PNG figures to `paper/figures/attention_maps_comparison.pdf`.
-2. **Diagnostic Metric Curves (`scripts/plot_metrics.py`):**
+1. **Multi-Seed Aggregation Engines:**
+   * Author `src/utils/logger.py` and `src/utils/aggregate_databudget.py` parsing run outputs to compute $\text{Mean} \pm \text{Std}$ for Top-1/Top-5 accuracy, generalization gap, and attention entropy.
+   * Output consolidated JSON summaries (`sweep_summary.json` and `summary.json`).
+2. **Diagnostic Metric & Ablation Comparison Figures:**
    * **Figure 2:** Layer index ($1 \to 12$) vs. Mean Shannon Entropy $\bar{H}^{(l)}$ across $K \in \{0, 1, 4, 8\}$.
    * **Figure 3:** Register count $K$ vs. Generalization Gap ($\Delta\mathcal{L} = \mathcal{L}_{\text{val}} - \mathcal{L}_{\text{train}}$).
-   * **Figure 4:** Training Loss & Validation Accuracy convergence curves across epochs.
+   * **Figure 5:** 100 vs. 300 images/class scaling comparison bar chart (`paper/figures/accuracy_100_vs_300.pdf`).
+   * **Figure 6:** Spatial CLS attention heatmaps and outlier suppression (`paper/figures/attention_maps_comparison.pdf`).
 3. **LaTeX Integration & Slide Deck:**
-   * Script `src/utils/export_latex.py` to auto-generate `paper/tables/results_table.tex` from `outputs/sweep_summary.json`.
+   * Script `src/utils/export_latex.py` to auto-generate `paper/tables/results_table.tex` directly from JSON summaries.
    * Populate `paper/sections/04_experimental_setup.tex` and `05_results_and_analysis.tex` with exact quantitative findings.
-   * Polish the 8-slide oral defense presentation in `presentation/slides.tex`.
-* **Definition of Done:** `python scripts/plot_metrics.py` generates publication-ready vector figures in `paper/figures/`, and `pdflatex paper/main.tex` compiles with zero broken references.
+   * Polish the 8-slide oral defense presentation in `presentation/slides.tex` and `presentation/slides.md`.
+* **Definition of Done:** `python scripts/plot_databudget_comparison.py` generates publication-ready vector figures, and paper Section 5 accurately documents both 100pc and 300pc ablation results.
 
 ---
 

@@ -192,8 +192,8 @@ def create_contribution_report(output_pdf_path: str):
         [
             Paragraph("<b>Gulnisa Abdurahmanli</b>", table_cell_style),
             Paragraph("gulnisa<br/>gulnisa.abdurahmanli@gmail.com", table_cell_style),
-            Paragraph("Data Engineering &amp; Pipeline Lead", table_cell_style),
-            Paragraph("<code>src/data/cifar100_subset.py</code>, <code>src/data/__init__.py</code>", table_cell_style),
+            Paragraph("Data Engineering &amp; Multi-Budget Lead", table_cell_style),
+            Paragraph("<code>src/data/cifar100_subset.py</code> (100 &amp; 300 imgs/class), <code>src/data/__init__.py</code>", table_cell_style),
             Paragraph("<b>20.0%</b>", table_cell_center),
         ],
         [
@@ -206,22 +206,22 @@ def create_contribution_report(output_pdf_path: str):
         [
             Paragraph("<b>Emil Ahmedli</b>", table_cell_style),
             Paragraph("emilahmedli5<br/>emilahmedli1905@gmail.com", table_cell_style),
-            Paragraph("Hardware Execution &amp; Sweeps Lead", table_cell_style),
-            Paragraph("<code>scripts/run_sweep.sh</code>, <code>configs/*.yaml</code>, <code>team1.conf</code> (WireGuard)", table_cell_style),
+            Paragraph("Ablation Sweeps &amp; Hardware Lead", table_cell_style),
+            Paragraph("<code>scripts/run_sweep.sh</code>, <code>scripts/run_databudget_sweep.sh</code>, <code>configs/</code>", table_cell_style),
             Paragraph("<b>20.0%</b>", table_cell_center),
         ],
         [
             Paragraph("<b>Rufet Dosteliyev</b>", table_cell_style),
             Paragraph("rufetdosteliyev<br/>rufetdosteliyev@gmail.com", table_cell_style),
-            Paragraph("Results Engine, Figures &amp; Paper Lead", table_cell_style),
-            Paragraph("<code>src/utils/export_latex.py</code>, <code>scripts/plot_metrics.py</code>, <code>paper/</code>", table_cell_style),
+            Paragraph("Ablation Analytics, Figures &amp; Paper Lead", table_cell_style),
+            Paragraph("<code>src/utils/aggregate_databudget.py</code>, <code>scripts/plot_*.py</code>, <code>paper/</code>", table_cell_style),
             Paragraph("<b>20.0%</b>", table_cell_center),
         ],
         [
             Paragraph("<b>TOTALS</b>", table_cell_style),
             Paragraph("<b>5 Team Members</b>", table_cell_style),
             Paragraph("<b>Balanced End-to-End Pure Research</b>", table_cell_style),
-            Paragraph("<b>12/12 Runs Verified (100% Passing Tests)</b>", table_cell_style),
+            Paragraph("<b>24/24 Ablation Runs Verified (100% Passing Tests)</b>", table_cell_style),
             Paragraph("<b>100.0%</b>", table_cell_center),
         ],
     ]
@@ -250,13 +250,13 @@ def create_contribution_report(output_pdf_path: str):
     story.append(Paragraph(
         "&bull; <b>Shahin Alakparov (20.0%):</b> Engineered <code>RegisterVisionTransformer</code> wrapping <code>timm</code> ViT-Tiny (d=192). "
         "Implemented prepend logic for learnable registers R &isin; &real;<sup>K &times; d</sup> and output slicing. Developed the AMP training harness in "
-        "<code>scripts/train.py</code> (AdamW, linear warmup + cosine annealing, gradient clipping, checkpoint serialization) and verified 50/50 tests.",
+        "<code>scripts/train.py</code> (AdamW, linear warmup + cosine annealing, gradient clipping, checkpoint serialization) and verified 59/59 tests.",
         bullet_style,
     ))
     story.append(Paragraph(
-        "&bull; <b>Gulnisa Abdurahmanli (20.0%):</b> Built <code>StratifiedCIFAR100Subset</code> in <code>src/data/cifar100_subset.py</code>, sampling exactly "
-        "100 samples/class (10k images) with deterministic generator seeds. Implemented 9,000 train / 1,000 val splits, Bicubic RandomResizedCrop(224), "
-        "AutoAugment, and standard test set evaluation loader with pinned memory and multi-worker prefetching.",
+        "&bull; <b>Gulnisa Abdurahmanli (20.0%):</b> Built generalized <code>StratifiedCIFAR100Subset</code> in <code>src/data/cifar100_subset.py</code>, sampling both "
+        "100 and 300 samples/class (10k and 30k images) with deterministic generator seeds. Implemented balanced 9k/1k and 27k/3k train/val splits, Bicubic "
+        "RandomResizedCrop(224), AutoAugment, and standard test set evaluation loader with pinned memory and multi-worker prefetching.",
         bullet_style,
     ))
     story.append(Paragraph(
@@ -266,15 +266,16 @@ def create_contribution_report(output_pdf_path: str):
         bullet_style,
     ))
     story.append(Paragraph(
-        "&bull; <b>Emil Ahmedli (20.0%):</b> Configured WireGuard VPN (<code>team1.conf</code>) and JupyterLab on the remote NVIDIA A100-SXM4 GPU cluster. "
-        "Structured YAML profiles (<code>configs/*.yaml</code>) across treatment arms and seeds {42, 1337, 3407}. Automated batch execution via "
-        "<code>scripts/run_sweep.sh</code> with GPU cache clearing, supervising 12/12 successful runs (173m 31s, zero OOMs).",
+        "&bull; <b>Emil Ahmedli (20.0%):</b> Led execution of all 24 ablation sweep runs across both data budgets (12 &times; 100pc and 12 &times; 300pc). "
+        "Configured WireGuard VPN (<code>team1.conf</code>) and remote NVIDIA A100-SXM4 GPU cluster environment. Authored automated execution runners "
+        "<code>scripts/run_sweep.sh</code> and <code>scripts/run_databudget_sweep.sh</code> with GPU cache clearing, supervising zero-OOM execution across 8+ hours.",
         bullet_style,
     ))
     story.append(Paragraph(
-        "&bull; <b>Rufet Dosteliyev (20.0%):</b> Built multi-seed aggregation engine in <code>src/utils/export_latex.py</code> and <code>src/utils/logger.py</code> "
-        "generating LaTeX tables directly from <code>sweep_summary.json</code> with zero manual transcription. Authored visualization scripts for attention heatmaps "
-        "and entropy trajectories, and compiled the IEEE conference manuscript (<code>paper/main.pdf</code>) and slide deck (<code>presentation/slides.pdf</code>).",
+        "&bull; <b>Rufet Dosteliyev (20.0%):</b> Led multi-seed ablation analytics, statistical reduction, and scientific reporting across both 100pc and 300pc "
+        "experimental suites. Built aggregation engines (<code>src/utils/logger.py</code> and <code>src/utils/aggregate_databudget.py</code>) producing "
+        "<code>sweep_summary.json</code> and <code>summary.json</code>. Authored comparative visualizers (<code>scripts/plot_metrics.py</code>, "
+        "<code>scripts/plot_databudget_comparison.py</code>), LaTeX tables, and manuscript Section 5.",
         bullet_style,
     ))
     story.append(Spacer(1, 4))
@@ -290,21 +291,15 @@ def create_contribution_report(output_pdf_path: str):
     )
     story.append(Spacer(1, 3))
 
-    sig_data = [
+    sig_data_1 = [
         [
             Paragraph("<b>Shahin Alakparov</b><br/><i>Core Architecture Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
             Paragraph("<b>Gulnisa Abdurahmanli</b><br/><i>Data Pipeline Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
             Paragraph("<b>Narmina Ibrahimova</b><br/><i>Metrics &amp; Hooks Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
         ],
-        [
-            Paragraph("<b>Emil Ahmedli</b><br/><i>Sweep Operations Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
-            Paragraph("<b>Rufet Dosteliyev</b><br/><i>Results &amp; Paper Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
-            Paragraph("<b>Course Instruction Team</b><br/><i>DLE-AI-202 Evaluation</i><br/>Status: <b>Submitted for Grading</b>", table_cell_style),
-        ],
     ]
-
-    sig_table = Table(sig_data, colWidths=[2.56 * inch, 2.56 * inch, 2.56 * inch])
-    sig_table.setStyle(
+    sig_table_1 = Table(sig_data_1, colWidths=[2.56 * inch, 2.56 * inch, 2.56 * inch])
+    sig_table_1.setStyle(
         TableStyle([
             ("BACKGROUND", (0, 0), (-1, -1), bg_light),
             ("GRID", (0, 0), (-1, -1), 0.5, border_color),
@@ -313,7 +308,27 @@ def create_contribution_report(output_pdf_path: str):
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ])
     )
-    story.append(sig_table)
+
+    sig_data_2 = [
+        [
+            Paragraph("<b>Emil Ahmedli</b><br/><i>Ablation Sweeps &amp; Cluster Operations Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
+            Paragraph("<b>Rufet Dosteliyev</b><br/><i>Ablation Analytics, Figures &amp; Paper Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
+        ],
+    ]
+    sig_table_2 = Table(sig_data_2, colWidths=[3.84 * inch, 3.84 * inch])
+    sig_table_2.setStyle(
+        TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), bg_light),
+            ("GRID", (0, 0), (-1, -1), 0.5, border_color),
+            ("TOPPADDING", (0, 0), (-1, -1), 3),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ])
+    )
+
+    story.append(sig_table_1)
+    story.append(Spacer(1, 2))
+    story.append(sig_table_2)
 
     doc.build(story)
     print(f"Successfully generated contribution report PDF at: {output_pdf_path}")
