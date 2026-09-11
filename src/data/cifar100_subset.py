@@ -1,11 +1,13 @@
 """
 Stratified low-data CIFAR-100 pipeline.
 
-Builds an exact, deterministic, class-balanced subset of CIFAR-100
-(100 images/class -> 90 train / 10 val) for the "Do Register Tokens
-Regularize Vision Transformers Under Data Scarcity?" project.
+Builds exact, deterministic, class-balanced subsets of CIFAR-100
+across configurable data budget regimes:
+  - Primary low-data benchmark: 100 images/class (9,000 train / 1,000 val)
+  - Data budget scaling ablation: 300 images/class (27,000 train / 3,000 val)
+for the "Do Register Tokens Regularize Vision Transformers Under Data Scarcity?" project.
 
-Author: Gulnisa (Lead Data Engineer)
+Author: Gulnisa Abdurahmanli (Lead Data Engineer)
 """
 
 import numpy as np
@@ -222,6 +224,52 @@ def get_cifar100_loaders(
 
 
 # ---------------------------------------------------------------------------
+# 4. Split and Budget Verification Utilities
+# ---------------------------------------------------------------------------
+def verify_data_budget_split(
+    dataset: torchvision.datasets.CIFAR100,
+    samples_per_class: int = 100,
+    train_ratio: float = 0.9,
+    seed: int = 42,
+) -> dict:
+    """
+    Validates stratification, class distribution balance, and zero-leakage
+    across a configured data budget split.
+    """
+    train_subset, val_subset = build_stratified_subsets(
+        dataset,
+        samples_per_class=samples_per_class,
+        train_ratio=train_ratio,
+        seed=seed,
+    )
+    targets = np.array(dataset.targets)
+    train_targets = targets[train_subset.indices]
+    val_targets = targets[val_subset.indices]
+
+    num_classes = int(targets.max()) + 1
+    expected_train = int(round(samples_per_class * train_ratio))
+    expected_val = samples_per_class - expected_train
+
+    train_counts = np.bincount(train_targets, minlength=num_classes)
+    val_counts = np.bincount(val_targets, minlength=num_classes)
+
+    assert (train_counts == expected_train).all(), f"Train split imbalance for budget {samples_per_class}"
+    assert (val_counts == expected_val).all(), f"Val split imbalance for budget {samples_per_class}"
+    assert set(train_subset.indices).isdisjoint(set(val_subset.indices)), "Overlap detected between train and val"
+
+    return {
+        "samples_per_class": samples_per_class,
+        "train_samples": len(train_subset),
+        "val_samples": len(val_subset),
+        "train_per_class": expected_train,
+        "val_per_class": expected_val,
+        "num_classes": num_classes,
+        "is_leakage_free": True,
+        "class_balance_verified": True,
+    }
+
+
+# ---------------------------------------------------------------------------
 # 5. Standalone verification test
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -229,6 +277,7 @@ if __name__ == "__main__":
     print("Testing Stratified CIFAR-100 Low-Data Pipeline")
     print("=" * 60)
 
+    # 1. Test standard 100 images/class pipeline (Phase 1-5 baseline)
     train_loader, val_loader, test_loader = get_cifar100_loaders(
         data_dir="./data",
         batch_size=64,
@@ -244,28 +293,27 @@ if __name__ == "__main__":
     n_val = len(val_loader.dataset)
     n_test = len(test_loader.dataset)
 
-    print(f"Train batches: {len(train_loader)} ({n_train:,} samples)")
-    print(f"Val batches:   {len(val_loader)} ({n_val:,} samples)")
-    print(f"Test batches:  {len(test_loader)} ({n_test:,} samples)")
-
+    print(f"[100pc] Train: {n_train:,} samples | Val: {n_val:,} samples | Test: {n_test:,} samples")
     assert n_train == 9000, f"Expected 9,000 train samples, got {n_train}"
     assert n_val == 1000, f"Expected 1,000 val samples, got {n_val}"
     assert n_test == 10000, f"Expected 10,000 test samples, got {n_test}"
 
-    images, labels = next(iter(train_loader))
-    print(f"Sample Batch Image Tensor Shape: {images.shape}")
-    print(f"Sample Batch Label Tensor Shape: {labels.shape}")
-    print(f"Image Tensor Min: {images.min().item():.4f}, Max: {images.max().item():.4f}")
+    # 2. Test 300 images/class pipeline (Phase 6 data scaling ablation)
+    full_train = torchvision.datasets.CIFAR100(
+        root="./data", train=True, download=False, transform=None
+    )
+    stats_300 = verify_data_budget_split(full_train, samples_per_class=300, seed=42)
+    print(f"[300pc] Train: {stats_300['train_samples']:,} samples | Val: {stats_300['val_samples']:,} samples | Balanced: {stats_300['class_balance_verified']}")
+    assert stats_300["train_samples"] == 27000
+    assert stats_300["val_samples"] == 3000
 
     # Cross-seed leakage sanity check across all three project seeds.
     for seed in (42, 1337, 3407):
-        full_train = torchvision.datasets.CIFAR100(
-            root="./data", train=True, download=False, transform=None
-        )
-        tr, va = build_stratified_subsets(full_train, seed=seed)
-        overlap = set(tr.indices).intersection(set(va.indices))
-        assert not overlap, f"Leakage found for seed {seed}"
-    print("Cross-seed leakage check passed for seeds 42, 1337, 3407.")
+        for budget in (100, 300):
+            tr, va = build_stratified_subsets(full_train, samples_per_class=budget, seed=seed)
+            overlap = set(tr.indices).intersection(set(va.indices))
+            assert not overlap, f"Leakage found for budget {budget}, seed {seed}"
+    print("Cross-seed and cross-budget leakage checks passed for seeds 42, 1337, 3407.")
 
     print("=" * 60)
     print("Data Loader Verification Passed Successfully!")
