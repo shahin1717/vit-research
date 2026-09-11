@@ -311,7 +311,7 @@ def create_contribution_report(output_pdf_path: str):
 
     sig_data_2 = [
         [
-            Paragraph("<b>Emil Ahmedli</b><br/><i>Ablation Sweeps &amp; Cluster Operations Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
+            Paragraph("<b>Emil Ahmedli</b><br/><i>Ablation Sweeps &amp; Hardware Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
             Paragraph("<b>Rufet Dosteliyev</b><br/><i>Ablation Analytics, Figures &amp; Paper Lead</i><br/>Status: <b>Verified &amp; Signed</b>", table_cell_style),
         ],
     ]

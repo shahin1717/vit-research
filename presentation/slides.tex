@@ -32,26 +32,41 @@
 % SLIDE 2: TEAM ROLES & CONTRIBUTION DISTRIBUTION (§6)
 % -----------------------------------------------------------------------------
 \begin{frame}{Team Task Distribution \& Course §6 Ownership}
-\footnotesize
 \begin{columns}[T]
 \column{0.48\textwidth}
-\begin{block}{Shahin Alakparov (Architecture \& Training)}
-Core \texttt{RegisterVisionTransformer} wrapper, zero-register positional invariant enforcement, training engine \& checkpointing pipeline.
-\end{block}
-\smallskip
-\begin{block}{Gulnisa Abdurahmanli (Data Pipeline)}
-Stratified 100 \& 300 images/class samplers, reproducible seed isolation, data budget extension pipeline.
-\end{block}
+\textbf{\color{structure}Shahin Alakparov} \hfill \textbf{20.0\%}\\
+\scriptsize \textbf{Core Architecture \& Training Lead}\\
+\texttt{src/models/register\_vit.py}, \texttt{scripts/train.py}\\
+Core wrapper, positional invariant, PyTorch AMP training.
+\vspace{0.22cm}
+
+\textbf{\color{structure}Gulnisa Abdurahmanli} \hfill \textbf{20.0\%}\\
+\scriptsize \textbf{Data Engineering \& Multi-Budget Lead}\\
+\texttt{src/data/cifar100\_subset.py} (100 \& 300 imgs/class)\\
+Stratified sampling, deterministic splits, seed isolation.
+\vspace{0.22cm}
+
+\textbf{\color{structure}Narmina Ibrahimova} \hfill \textbf{20.0\%}\\
+\scriptsize \textbf{Metrics \& Interpretability Lead}\\
+\texttt{src/models/attention\_hook.py}, \texttt{src/metrics/}\\
+Unfused hooks, Shannon entropy $\bar{H}^{(l)}$, outlier rate $\rho^{(l)}$.
 
 \column{0.48\textwidth}
-\begin{block}{Narmina Ibrahimova (Attention Hooks)}
-Unfused attention reconstruction, Shannon entropy $\bar{H}^{(l)}$ \& patch outlier rate $\rho^{(l)}$, off-by-$K$ spatial slice guards.
-\end{block}
-\smallskip
-\begin{block}{Emil Ahmedli \& Rufet Dosteliyev (Cluster \& Results)}
-\textbf{Emil:} NVIDIA A100 GPU cluster execution, WireGuard VPN, 24-run sweep automation.\\
-\textbf{Rufet:} Results aggregation engine, multi-seed statistical reductions \& publication vector plots.
-\end{block}
+\textbf{\color{structure}Emil Ahmedli} \hfill \textbf{20.0\%}\\
+\scriptsize \textbf{Ablation Sweeps \& Hardware Lead}\\
+\texttt{scripts/run\_*sweep.sh}, \texttt{configs/}, \texttt{team1.conf}\\
+NVIDIA A100 GPU cluster, WireGuard VPN, 24 sweep runs.
+\vspace{0.22cm}
+
+\textbf{\color{structure}Rufet Dosteliyev} \hfill \textbf{20.0\%}\\
+\scriptsize \textbf{Ablation Analytics, Figures \& Paper Lead}\\
+\texttt{src/utils/aggregate\_databudget.py}, \texttt{plot\_*.py}, \texttt{paper/}\\
+Statistical reduction, publication figures, IEEE paper writing.
+\vspace{0.22cm}
+
+\begin{exampleblock}{Equal Contribution Policy (§6 Compliance)}
+\scriptsize Strict parity across formulation, cluster compute, diagnostics, statistical analytics, and paper deliverables.
+\end{exampleblock}
 \end{columns}
 \end{frame}
 
@@ -230,7 +245,7 @@ $$\rho^{(l)} = \frac{1}{BN} \sum_{b,n} \mathbf{1}\left[ \|x_{b, 1+K+n}^{(l)}\|_2
 % -----------------------------------------------------------------------------
 % SLIDE 9: 04. SWEEP EXECUTION ON NVIDIA A100 (EMIL)
 % -----------------------------------------------------------------------------
-\begin{frame}{04. Sweep Execution --- Emil (Operations \& Cluster)}
+\begin{frame}{04. Sweep Execution --- Emil (Ablation Sweeps \& Hardware Lead)}
 \small
 \begin{columns}[T]
 \column{0.50\textwidth}
@@ -261,7 +276,7 @@ The table generator independently recomputes all statistics from raw logs. Not o
 % -----------------------------------------------------------------------------
 % SLIDE 10: 05. MAIN RESULTS: 100 IMAGES/CLASS (RUFET)
 % -----------------------------------------------------------------------------
-\begin{frame}{05. Main Results (100 pc) --- Rufet (Results Engine)}
+\begin{frame}{05. Main Results (100 pc) --- Rufet (Analytics, Figures \& Paper Lead)}
 \small
 \begin{center}
 \scriptsize
