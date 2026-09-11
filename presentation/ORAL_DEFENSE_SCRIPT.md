@@ -1,64 +1,67 @@
-# 🎙️ Oral Defense Presentation Script: "One Turn per Member"
+# 🎙️ Oral Defense Presentation Script (Balanced Multi-Turn Flow)
 **Course:** DLE-AI-202 (Deep Learning), Cohort I 2026 — Track 1: Pure Research  
 **Project:** *Do Register Tokens Regularize Vision Transformers Under Data Scarcity? A Controlled 24-Run Empirical Ablation on Low-Data CIFAR-100*  
 **Deck Source:** [`presentation/slides.tex`](file:///home/shahin/aiac-res/presentation/slides.tex) | **Target Duration:** 13–15 Minutes Total  
 
 ---
 
-### 📋 Overview of Speaking Turns
+### 📋 Overview of Balanced Speaker Roles
 
-| Order | Speaker | Official Role | Slides Covered | Time Target |
+| Part | Speaker | Official Role | Slides Covered | Target Time |
 |:---:|---|---|:---:|:---:|
-| **1** | **Shahin Alakparov** *(Starts)* | Core Architecture & Training Lead | **Slides 1 – 4** | 3:00 |
-| **2** | **Gulnisa Abdurahmanli** | Data Engineering & Multi-Budget Lead | **Slides 5 – 6** | 2:00 |
-| **3** | **Narmina Ibrahimova** | Metrics & Interpretability Lead | **Slides 7 – 8** | 2:30 |
-| **4** | **Emil Ahmedli** | Ablation Sweeps & Hardware Lead | **Slide 9** | 1:45 |
-| **5** | **Rufet Dosteliyev** *(Closes)* | Ablation Analytics, Figures & Paper Lead | **Slides 10 – 17** | 4:45 |
-| **—** | **All Members** | Committee Examination | **Slide 17 (Q&A)** | Open |
+| **1** | **Shahin Alakparov** *(Starts)* | Core Architecture & Training Lead | **Slides 1 – 4** | ~3:00 |
+| **2** | **Gulnisa Abdurahmanli** | Data Engineering & Multi-Budget Lead | **Slides 5 – 6** | ~2:00 |
+| **3** | **Narmina Ibrahimova** | Metrics & Interpretability Lead | **Slides 7 – 8** | ~2:15 |
+| **4** | **Emil Ahmedli** | Ablation Sweeps & Hardware Lead | **Slides 9 – 10** | ~2:30 |
+| **5** | **Rufet Dosteliyev** | Ablation Analytics, Figures & Paper Lead | **Slide 11** | ~1:30 |
+| **6** | **Narmina Ibrahimova** | Metrics & Interpretability Lead | **Slide 12** | ~1:15 |
+| **7** | **Gulnisa Abdurahmanli** | Data Engineering & Multi-Budget Lead | **Slide 13** | ~1:15 |
+| **8** | **Shahin Alakparov** *(Closes)* | Core Architecture & Training Lead | **Slides 14 – 16** | ~2:30 |
+| **—** | **All Team Members** | Committee Examination | **Slide 17 (Q&A)** | Open |
 
 ---
 
-## 👤 Speaker 1: Shahin Alakparov (Core Architecture & Training Lead)
+## 👤 Turn 1: Shahin Alakparov (Opening, Context & Hypotheses)
 **Slides Covered:** 1, 2, 3, 4 | **Allocated Time:** ~3:00  
 
 ---
 
-### [SLIDE 1: Title & Introduction]
+### [SLIDE 1: Title Page]
 *(Wait for committee attention. Speak with calm, authoritative confidence.)*
 
 > "Good morning, members of the evaluation committee and colleagues. 
 > 
-> Today, our team is presenting our pure research investigation: **'Do Register Tokens Regularize Vision Transformers Under Data Scarcity? A Controlled 24-Run Empirical Ablation on Low-Data CIFAR-100.'**
+> Today, our team is presenting our empirical research study: **'Do Register Tokens Regularize Vision Transformers Under Data Scarcity? A Controlled 24-Run Empirical Ablation on Low-Data CIFAR-100.'**
 > 
-> Over the past several weeks, our group investigated an open question at the intersection of Vision Transformer architecture, attention sink dynamics, and generalization in extreme low-data regimes."
+> Over the past several weeks, our group investigated an open question in transformer representation learning: whether register tokens—originally proposed by Darcet and colleagues at ICLR 2024 to clean up spatial attention maps in foundation models—function as an architectural regularizer when models are starved of training data."
 
 ---
 
 ### [ADVANCE TO SLIDE 2: Team Task Distribution & Course §6 Ownership]
 
-> "Before we dive into the core machine learning problem, I want to outline our team's division of responsibility under Course Section 6.
+> "Before we unpack the machine learning problem, I want to briefly outline our team's division of responsibility under Course Section 6.
 > 
-> Our research was executed across five tightly integrated, modular engineering layers, with equal contribution across the team:
+> Our research was executed across five tightly integrated, modular engineering layers, with equal effort across all members:
 > - I led the core PyTorch model architecture, the zero-register invariant wrapper, and the AMP training harness.
 > - **Gulnisa Abdurahmanli** engineered our multi-budget stratified data samplers and cross-split isolation protocols.
 > - **Narmina Ibrahimova** authored our non-invasive attention hooks and diagnostic interpretability metrics.
-> - **Emil Ahmedli** managed our remote NVIDIA A100 GPU cluster environment and orchestrated all 24 sweep runs.
+> - **Emil Ahmedli** configured our remote NVIDIA A100 GPU cluster environment and orchestrated all 24 sweep runs.
 > - And **Rufet Dosteliyev** led our statistical analytics engine, publication figure pipelines, and LaTeX manuscript authoring.
 > 
-> Each member will speak once during this defense, walking you through their specific technical domain."
+> We will each present our respective technical domains during this defense."
 
 ---
 
 ### [ADVANCE TO SLIDE 3: 01. The Question]
 
-> "Let us begin with the core observation that motivated our study.
+> "Let us begin with the core observation that motivated our research.
 > 
-> In large Vision Transformers, attention heads quietly vandalize their own spatial representations. In ICLR 2024, Darcet and colleagues demonstrated that in standard Vision Transformers—such as DINOv2 and DeiT—a small handful of background patch tokens consistently acquire massive activation norms. When you examine the self-attention maps, the CLS token routes an enormous portion of its attention budget directly to these empty background patches.
+> In standard Vision Transformers, attention heads quietly vandalize their own spatial representations. In ICLR 2024, Darcet and colleagues demonstrated that in models like DINOv2 and DeiT, a small handful of background patch tokens consistently acquire massive activation norms. When you inspect the self-attention maps, the `[CLS]` token routes an enormous portion of its attention budget directly to these empty background patches.
 > 
 > Why does this happen? The network is essentially repurposing uninformative image regions as scratch space to store and compute global context. Darcet's proposed fix was remarkably simple: prepending dedicated, learnable scratchpad tokens—called **register tokens**—to the sequence. The model offloads its scratchpad computations to the registers, and the spatial attention artifacts disappear.
 > 
 > Here is the critical gap in that narrative:
-> Darcet et al. demonstrated this phenomenon exclusively in foundation models trained on hundreds of millions or billions of images. But if register tokens absorb representational capacity that the model would otherwise waste on memorizing artifacts, they possess the structural properties of a **regularizer**.
+> Darcet et al. demonstrated this phenomenon exclusively in massive foundation models trained on hundreds of millions or billions of images. But if register tokens absorb representational capacity that the model would otherwise waste on memorizing artifacts, they possess the structural properties of a **regularizer**.
 > 
 > And in machine learning, a regularizer only proves its worth when data is scarce and severe overfitting bites.
 > 
@@ -80,13 +83,13 @@
 
 ---
 
-## 👤 Speaker 2: Gulnisa Abdurahmanli (Data Engineering & Multi-Budget Lead)
+## 👤 Turn 2: Gulnisa Abdurahmanli (Data Environment & Control)
 **Slides Covered:** 5, 6 | **Allocated Time:** ~2:00  
 
 ---
 
 ### [SLIDE 5: 02. Starving the Model]
-*(Acknowledge Shahin with a nod; speak clearly and deliberately about experimental discipline.)*
+*(Acknowledge Shahin with a nod; speak clearly about experimental discipline.)*
 
 > "Thank you, Shahin. I am Gulnisa Abdurahmanli, and I led the data engineering, multi-budget sampling pipelines, and experimental control protocols.
 > 
@@ -94,7 +97,7 @@
 > 
 > We constructed two controlled low-data regimes on CIFAR-100:
 > - First, our **primary benchmark of 100 images per class**, providing 10,000 total images partitioned into a strict 9,000 training, 1,000 validation, and the standard 10,000 held-out test set. At 9,000 images, a Vision Transformer suffers intense data scarcity.
-> - Second, an **extension budget of 300 images per class**—27,000 training images—which we will discuss later to verify scale invariance.
+> - Second, an **extension budget of 300 images per class**—27,000 training images—which I will discuss later to verify scale invariance.
 > 
 > Every image is upsampled via Bicubic interpolation to $224 \times 224$ pixels. This ensures the model operates on the standard $14 \times 14$ patch grid with patch size 16, yielding exactly 196 spatial tokens.
 > 
@@ -125,8 +128,8 @@
 
 ---
 
-## 👤 Speaker 3: Narmina Ibrahimova (Metrics & Interpretability Lead)
-**Slides Covered:** 7, 8 | **Allocated Time:** ~2:30  
+## 👤 Turn 3: Narmina Ibrahimova (Architecture & Diagnostic Hooks)
+**Slides Covered:** 7, 8 | **Allocated Time:** ~2:15  
 
 ---
 
@@ -166,17 +169,17 @@
 > 
 > To guarantee total parity, both readouts are evaluated across all checkpoints using the exact same frozen probe of 64 test images.
 > 
-> I will now pass the floor to Emil to discuss our cluster infrastructure and sweep execution."
+> I will now pass the floor to Emil to discuss our cluster infrastructure, sweep execution, and our primary empirical findings."
 
 ---
 
-## 👤 Speaker 4: Emil Ahmedli (Ablation Sweeps & Hardware Lead)
-**Slides Covered:** 9 | **Allocated Time:** ~1:45  
+## 👤 Turn 4: Emil Ahmedli (Cluster Execution & Primary Sweep Results)
+**Slides Covered:** 9, 10 | **Allocated Time:** ~2:30  
 
 ---
 
 ### [SLIDE 9: 04. Sweep Execution on NVIDIA A100]
-*(Deliver with an operational, systems-oriented tone.)*
+*(Deliver with an operational, systems-oriented authority.)*
 
 > "Thank you, Narmina. I am Emil Ahmedli, and I led the hardware operations, cluster configuration, and sweep execution.
 > 
@@ -190,41 +193,39 @@
 > 
 > I authored automated execution harnesses—`scripts/run_sweep.sh` and `scripts/run_databudget_sweep.sh`—incorporating dynamic GPU memory clearing, automated checkpoint serialization, and per-epoch telemetry logging.
 > 
-> The cluster completed all 24 runs—representing over 8 hours of continuous GPU compute—with **100% execution success, zero out-of-memory errors, and zero crashes**.
-> 
-> To eliminate human error, each run writes to an isolated directory containing its frozen weights, training history, and JSON metrics. Our downstream analytics pipeline directly parses these raw JSON logs to generate all tables and figures. Not a single number in our paper was typed by hand.
-> 
-> Now, I will hand over to Rufet to walk you through our empirical findings, statistical analyses, and final conclusions."
+> The cluster completed all 24 runs—representing over 8 hours of continuous GPU compute—with **100% execution success, zero out-of-memory errors, and zero crashes**."
 
 ---
 
-## 👤 Speaker 5: Rufet Dosteliyev (Ablation Analytics, Figures & Paper Lead)
-**Slides Covered:** 10, 11, 12, 13, 14, 15, 16, 17 | **Allocated Time:** ~4:45  
+### [ADVANCE TO SLIDE 10: 05. Main Results: 100 Images/Class]
 
----
-
-### [SLIDE 10: 05. Main Results: 100 Images/Class]
-*(Speak with scientific authority; guide the committee through the key empirical insights.)*
-
-> "Thank you, Emil. I am Rufet Dosteliyev, and I led the statistical analytics, visualization pipelines, and the writing of our paper.
+> "Now, let us examine the core empirical results generated by our 24 sweep runs on Slide 10.
 > 
-> Let us examine the main results table for our primary 100 images/class budget on Slide 10.
-> 
-> Immediately, a remarkable split appears right down the middle of the table:
+> Immediately, a remarkable pattern appears right down the middle of the table:
 > - Looking at the first two columns—**held-out Test Accuracy and Test Loss**—the baseline model with **zero registers ($K=0$) takes first place**, achieving $75.19\%$ accuracy and a test loss of $1.6357$.
 > - But looking at the last two columns—**Validation Loss and the Generalization Gap $\Delta\mathcal{L}$**—the $K=4$ configuration appears to win, showing the lowest validation loss of $1.6492$ and the smallest generalization gap of $0.7680$.
 > 
 > When we examine the paired comparisons across seeds, $K=1$ and $K=8$ lose test accuracy in **3 out of 3 seeds**. $K=4$ edges ahead in only 1 of 3 seeds, with a mean delta of $-0.13$ pp and a non-significant $p$-value of $0.466$.
 > 
-> In short: on held-out test data, registers cost between zero and half a point of accuracy; they gain nothing."
+> On held-out test data, registers cost between zero and half a point of accuracy; they gain nothing.
+> 
+> To explain why validation loss dropped while test loss stayed flat, Rufet will present our statistical analysis of the generalization gap."
 
 ---
 
-### [ADVANCE TO SLIDE 11: The Finding: A Regularizer on One Split Only]
+## 👤 Turn 5: Rufet Dosteliyev (The Generalization Gap Discovery)
+**Slides Covered:** 11 | **Allocated Time:** ~1:30  
 
-> "This brings us to the central scientific discovery of our research: **registers act as a regularizer on one split only**.
+---
+
+### [SLIDE 11: The Finding: A Regularizer on One Split Only]
+*(Speak with analytical precision; guide the committee through the statistical finding.)*
+
+> "Thank you, Emil. I am Rufet Dosteliyev, and I led the statistical analytics, visualization pipelines, and the writing of our paper.
 > 
-> Look at the figure on the left and the statistical breakdown on the right:
+> Emil just showed that validation loss fell while test loss remained flat. This brings us to the central scientific discovery of our research: **registers act as a regularizer on one split only**.
+> 
+> Look at the figure on the left and the statistical breakdown on the right of Slide 11:
 > When comparing $K=4$ against control across all three seeds:
 > - On the validation split, validation loss falls by $-0.0337$, consistent across all three seeds, yielding a statistically significant $p = 0.024$. The generalization gap shrinks with $p = 0.051$.
 > - But on the held-out test set, that effect completely vanishes: $\bar{\delta} = +0.0018$, with a non-significant $p = 0.823$.
@@ -234,24 +235,43 @@
 > 
 > In machine learning, a true regularizer trades away training fit in exchange for superior held-out generalization. Here, training loss never moved. **Nothing was traded.**
 > 
-> The apparent regularization on validation was simply an artifact of checkpoint selection picking the minimum over 50 noisy epochs on a small 1,000-image split."
+> The apparent regularization on validation was simply an artifact of checkpoint selection picking the minimum over 50 noisy epochs on a small 1,000-image split.
+> 
+> Now, Narmina will take us through the internal mechanism checks on entropy and patch outliers."
 
 ---
 
-### [ADVANCE TO SLIDE 12: Mechanism Checks: H2 Supported, H3 Not Supported]
-
-> "Next, let us examine our diagnostic mechanism hypotheses on Slide 12:
-> 
-> - **Hypothesis 2 (Capacity Dilution) is strongly supported.** Prepending 8 registers ($K=8$) produced the only statistically significant held-out degradation in the entire study: test loss increased by $+0.0203$ in **3 out of 3 seeds** with $p = 0.014$. Final-block attention entropy also dropped across all 3 seeds. In a compact 192-dimensional model, forcing attention to allocate probability mass across 8 content-free tokens measurably taxes performance.
-> - **Hypothesis 3 (Entropy Collapse) is not supported.** As shown in the left figure, the layer-wise entropy curves lie directly on top of each other ($\Delta H \approx 0.001$ bits). Furthermore, the outlier rate actually rises slightly from $1.227\%$ to $1.254\%$. Registers simply do not absorb artifacts in this regime."
+## 👤 Turn 6: Narmina Ibrahimova (Mechanism Checks)
+**Slides Covered:** 12 | **Allocated Time:** ~1:15  
 
 ---
 
-### [ADVANCE TO SLIDE 13: 06. Scale Invariance: 100 vs. 300 Images/Class]
+### [SLIDE 12: Mechanism Checks: H2 & H3]
+*(Step in with diagnostic authority; interpret the curves.)*
 
-> "A natural question is: could this null result be merely an artifact of extreme data starvation at 100 images per class?
+> "Thank you, Rufet. Let us now examine whether the internal attention mechanics match our initial hypotheses on Slide 12.
 > 
-> To answer this, we tripled the data budget to **300 images per class**—27,000 training images.
+> First, **Hypothesis 2 (Capacity Dilution) is strongly supported.**
+> Prepending 8 registers ($K=8$) produced the only statistically significant held-out degradation in the entire study: test loss increased by $+0.0203$ in **3 out of 3 seeds** with $p = 0.014$. Furthermore, final-block attention entropy dropped across all 3 seeds. In a compact 192-dimensional model, forcing attention to allocate probability mass across 8 content-free tokens measurably taxes model capacity.
+> 
+> Second, **Hypothesis 3 (Entropy Collapse) is not supported.**
+> As shown in the left figure, the layer-wise entropy curves lie directly on top of each other ($\Delta H \approx 0.001$ bits). Furthermore, the outlier rate actually rises slightly from $1.227\%$ to $1.254\%$. Registers simply do not absorb artifacts in this regime.
+> 
+> To test whether this null result was merely an artifact of extreme starvation at 100 images per class, Gulnisa will now present our 300 images per class scaling extension."
+
+---
+
+## 👤 Turn 7: Gulnisa Abdurahmanli (Scale Invariance Extension)
+**Slides Covered:** 13 | **Allocated Time:** ~1:15  
+
+---
+
+### [SLIDE 13: 06. Scale Invariance: 100 vs. 300 Images/Class]
+*(Present the scaling results confidently.)*
+
+> "Thank you, Narmina. A natural question from any reviewer is: could this null result be an artifact of extreme data starvation at 100 images per class?
+> 
+> To resolve this, we tripled the data budget to **300 images per class**—27,000 training images.
 > 
 > As you can see in the vector plot on Slide 13, tripling the training data caused baseline accuracy to surge by **+6.14 percentage points**, from $75.19\%$ to $81.33\%$.
 > 
@@ -260,14 +280,21 @@
 > - $K=1$ and $K=4$ reached $81.23\%$.
 > - $K=8$ reached $81.02\%$.
 > 
-> All paired differences remain statistically non-significant ($p > 0.50$).
-> This proves that our null result is **scale-invariant** across low-data budgets."
+> All pairwise differences remain statistically non-significant ($p > 0.50$).
+> This proves that our null result is **scale-invariant** across low-data budgets.
+> 
+> Finally, Shahin will present our bonus test-time experiment and conclude the presentation."
 
 ---
 
-### [ADVANCE TO SLIDE 14: 07. Bonus Experiment: Registers Without Training]
+## 👤 Turn 8: Shahin Alakparov (Bonus Experiment, Interpretation & Closing)
+**Slides Covered:** 14, 15, 16, 17 | **Allocated Time:** ~2:30  
 
-> "We also conducted an exploratory bonus experiment testing a cutting-edge question: **do registers even need to be trained?**
+---
+
+### [SLIDE 14: 07. Bonus Experiment: Registers Without Training]
+
+> "Thank you, Gulnisa. We also conducted an exploratory bonus experiment testing a cutting-edge question: **do registers even need to be trained?**
 > 
 > In NeurIPS 2025, Jiang et al. showed that on large foundation models, one can identify outlier-producing neurons and redirect their activation into an empty, untrained token slot at test time with zero training.
 > 

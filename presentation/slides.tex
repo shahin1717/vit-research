@@ -73,7 +73,7 @@ Statistical reduction, publication figures, IEEE paper writing.
 % -----------------------------------------------------------------------------
 % SLIDE 3: 01. THE QUESTION (SHAHIN)
 % -----------------------------------------------------------------------------
-\begin{frame}{01. The Question --- Shahin (Architecture \& Training)}
+\begin{frame}{01. The Question}
 \small
 \textbf{Large ViTs quietly vandalise their own attention.}
 \begin{itemize}\itemsep=1pt
@@ -130,7 +130,7 @@ Registers prevent the layer-wise collapse of attention entropy $\bar{H}^{(l)}$ a
 % -----------------------------------------------------------------------------
 % SLIDE 5: 02. STARVING THE MODEL (GULNISA)
 % -----------------------------------------------------------------------------
-\begin{frame}{02. Starving the Model --- Gulnisa (Data Pipeline)}
+\begin{frame}{02. Starving the Model}
 \small
 \begin{columns}[T]
 \column{0.52\textwidth}
@@ -184,7 +184,7 @@ Because the arms are strictly matched within each seed, we can \textbf{subtract 
 % -----------------------------------------------------------------------------
 % SLIDE 7: 03. WHAT A REGISTER IS (NARMINA)
 % -----------------------------------------------------------------------------
-\begin{frame}{03. Registers \& Instrumentation --- Narmina (Metrics \& Hooks)}
+\begin{frame}{03. Registers \& Instrumentation}
 \small
 \textbf{The token sequence, and the slice that decides everything:}
 \begin{center}
@@ -245,7 +245,7 @@ $$\rho^{(l)} = \frac{1}{BN} \sum_{b,n} \mathbf{1}\left[ \|x_{b, 1+K+n}^{(l)}\|_2
 % -----------------------------------------------------------------------------
 % SLIDE 9: 04. SWEEP EXECUTION ON NVIDIA A100 (EMIL)
 % -----------------------------------------------------------------------------
-\begin{frame}{04. Sweep Execution --- Emil (Ablation Sweeps \& Hardware Lead)}
+\begin{frame}{04. Sweep Execution on NVIDIA A100}
 \small
 \begin{columns}[T]
 \column{0.50\textwidth}
@@ -274,9 +274,9 @@ The table generator independently recomputes all statistics from raw logs. Not o
 \end{frame}
 
 % -----------------------------------------------------------------------------
-% SLIDE 10: 05. MAIN RESULTS: 100 IMAGES/CLASS (RUFET)
+% SLIDE 10: 05. MAIN RESULTS: 100 IMAGES/CLASS (EMIL)
 % -----------------------------------------------------------------------------
-\begin{frame}{05. Main Results (100 pc) --- Rufet (Analytics, Figures \& Paper Lead)}
+\begin{frame}{05. Main Results: 100 Images/Class}
 \small
 \begin{center}
 \scriptsize
@@ -339,9 +339,9 @@ A true regularizer trades training fit for held-out fit. Training loss never mov
 \end{frame}
 
 % -----------------------------------------------------------------------------
-% SLIDE 12: MECHANISM CHECKS (RUFET)
+% SLIDE 12: MECHANISM CHECKS (NARMINA)
 % -----------------------------------------------------------------------------
-\begin{frame}{Mechanism Checks: H2 Supported, H3 Not Supported}
+\begin{frame}{Mechanism Checks: H2 \& H3}
 \begin{columns}[T]
 \column{0.54\textwidth}
 \includegraphics[width=\linewidth]{entropy_vs_layer.pdf}
@@ -364,7 +364,7 @@ A true regularizer trades training fit for held-out fit. Training loss never mov
 \end{frame}
 
 % -----------------------------------------------------------------------------
-% SLIDE 13: 06. SCALE INVARIANCE (100 VS 300 PC)
+% SLIDE 13: 06. SCALE INVARIANCE (GULNISA)
 % -----------------------------------------------------------------------------
 \begin{frame}{06. Scale Invariance: 100 vs.\ 300 Images/Class}
 \begin{columns}[c]
@@ -390,7 +390,7 @@ A true regularizer trades training fit for held-out fit. Training loss never mov
 \end{frame}
 
 % -----------------------------------------------------------------------------
-% SLIDE 14: 07. BONUS EXPERIMENT: TEST-TIME REGISTERS
+% SLIDE 14: 07. BONUS EXPERIMENT: TEST-TIME REGISTERS (SHAHIN)
 % -----------------------------------------------------------------------------
 \begin{frame}{07. Bonus Experiment: Registers Without Training}
 \small
@@ -418,7 +418,7 @@ Stage 2: Redirection (Block 9) & $75.24 \pm 0.25$ & 1.1103 & Top-4 neurons redir
 \end{frame}
 
 % -----------------------------------------------------------------------------
-% SLIDE 15: INTERPRETATION: A SCOPE RESULT
+% SLIDE 15: INTERPRETATION: A SCOPE RESULT (RUFET)
 % -----------------------------------------------------------------------------
 \begin{frame}{Interpretation: A Scope Result, Not a Refutation}
 \small
@@ -442,7 +442,7 @@ Stage 2: Redirection (Block 9) & $75.24 \pm 0.25$ & 1.1103 & Top-4 neurons redir
 \end{frame}
 
 % -----------------------------------------------------------------------------
-% SLIDE 16: CONCLUSION & TAKEAWAYS
+% SLIDE 16: CONCLUSION & TAKEAWAYS (SHAHIN)
 % -----------------------------------------------------------------------------
 \begin{frame}{Conclusion \& Defense Takeaways}
 \small
