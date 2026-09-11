@@ -130,9 +130,27 @@ gantt
 - [ ] **5.3 Build Slide Deck (`C:\Vaults\aiac-res\presentation\`):**
   - Finalize 8–10 slide deck (`slides.tex` / `slides.md`) covering problem, method, results, and capacity limits.
 - [ ] **5.4 Final Submission Checklist (Due Mon 7 Sep 23:59):**
-  - [ ] GitHub repository clean, reproducible, and committed to `main`.
-  - [ ] Compiled PDF research paper.
-  - [ ] PDF slide presentation.
+  - [x] GitHub repository clean, reproducible, and committed to `main`.
+  - [x] Compiled PDF research paper (`paper/main.pdf`).
+  - [x] PDF slide presentation (`presentation/slides.pdf`).
+  - [x] Official team contribution report deliverable (`contribution_report.pdf` per §6).
+
+---
+
+### 🔬 Phase 6: Data Budget Scaling Extension (100 vs. 300 Images/Class)
+**Goal:** Evaluate whether the empirical null result holds when data triples to 300 images/class (8.46 GPU-hours).
+
+- [x] **6.1 Parameterize 300pc Configuration Profiles:**
+  - Create `configs/baseline_k0_300pc.yaml`, `configs/vit_tiny_k1_300pc.yaml`, `configs/vit_tiny_k4_300pc.yaml`, `configs/vit_tiny_k8_300pc.yaml`.
+- [x] **6.2 Isolated Sweep Runner & Aggregator:**
+  - Authored `scripts/run_databudget_sweep.sh` targeting `outputs_databudget/` and `checkpoints_databudget/`.
+  - Authored `src/utils/aggregate_databudget.py` reducing multi-seed runs into `outputs_databudget/summary.json`.
+- [x] **6.3 Comparison Visualizer:**
+  - Authored `scripts/plot_databudget_comparison.py` generating `paper/figures/accuracy_100_vs_300.pdf`.
+- [ ] **6.4 Full 12-Run Execution (Runs 13–24):**
+  - `bash scripts/run_databudget_sweep.sh` (~8.46 GPU-hours on A100).
+- [ ] **6.5 Paper Subsection & Discussion Update:**
+  - Add subsection "Does the null result hold at 300 images/class?" to `paper/sections/05_results.tex`.
 
 ---
 
