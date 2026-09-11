@@ -77,3 +77,54 @@ long enough for the routing to reorganise, or start from a regime where the
 artifact rate is measurably elevated in the first place. Absent one of those
 changes, adding register tokens to a pretrained small ViT and fine-tuning on
 scarce data is, on this evidence, a no-op at best.
+
+\subsection{An exploratory check: registers without training}
+
+The negative result above concerns registers introduced via fine-tuning. A
+separate mechanism, proposed independently of our study, avoids training
+entirely: Jiang et al.~\cite{jiang2025} identify the specific neurons
+responsible for high-norm outlier tokens and redirect their activity into an
+untrained token slot at inference time, with no gradient updates. We ran a
+small, exploratory check of this idea against our own $K=0$ checkpoints, using
+a simplified single-block reimplementation rather than a full port of their
+method.
+
+Three conditions were tested across the same three $K=0$ checkpoints (seeds
+42, 1337, 3407): a passive empty token slot with no redirection ($+0.07$ pp
+over baseline), active redirection of four identified neurons at block~1
+($+0.064$ pp), and at block~9 ($+0.06$ pp). A fourth condition, redirection at
+block~11 (the final block), returned results numerically identical to the
+passive-slot condition in every seed. This is not an empirical null finding
+but an architectural necessity: block~11 is followed by no further
+self-attention, and the classification head reads only the [CLS] token, so
+any intervention confined to non-CLS positions at the final block has no path
+back to the token the model is evaluated on. We report this as a
+methodological note rather than evidence about the register mechanism at
+block~11.
+
+Among the two valid targets (blocks~1 and~9), active redirection did not
+exceed the passive empty-slot condition, and all differences are far smaller
+than the between-seed dispersion of the $K=0$ baseline itself ($0.30$ pp). We
+treat this as a small additional data point consistent with our main
+conclusion rather than independent confirmatory evidence: this check used a
+single block, four neurons, and three seeds, with no paired statistical
+treatment matching Table~II, and should not be read with the same confidence
+as the primary ablation.
+
+\begin{table}[h]
+\centering
+\caption{Exploratory test-time register check (no training), $K=0$
+checkpoints, three seeds. Block~11 is architecturally incapable of affecting
+the CLS-read classification head; see text.}
+\label{tab:test_time_registers}
+\begin{tabular}{lc}
+\toprule
+Condition & Test Top-1 (\%) \\
+\midrule
+Baseline ($K=0$, untouched)         & $75.18 \pm 0.30$ \\
+Passive empty slot (no redirection) & $75.25 \pm 0.24$ \\
+Redirection at block 1              & $75.25 \pm 0.26$ \\
+Redirection at block 9              & $75.24 \pm 0.25$ \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -16,6 +16,7 @@ Public Exports:
 
 from .entropy import compute_shannon_entropy, compute_layerwise_entropy
 from .outliers import compute_patch_outlier_rate, compute_layerwise_outlier_rate
+from .outlier_mask import get_outlier_mask
 from .generalization import (
     compute_generalization_gap,
     compute_accuracy_gap,
@@ -27,6 +28,7 @@ __all__ = [
     "compute_layerwise_entropy",
     "compute_patch_outlier_rate",
     "compute_layerwise_outlier_rate",
+    "get_outlier_mask",
     "compute_generalization_gap",
     "compute_accuracy_gap",
     "GeneralizationGapTracker",
